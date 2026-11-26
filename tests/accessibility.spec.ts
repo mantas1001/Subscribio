@@ -95,10 +95,22 @@ const screens: Screen[] = [
     owner: 'C',
     route: '/add-employee',
     act: async (p) => {
-      await p.getByLabel(/name/i).first().fill('Jonas Vega');
-      await p.getByLabel(/email/i).first().fill('drew.cooper@example.com');
-      await p.getByLabel(/email/i).first().press('Enter');
-      await p.waitForTimeout(800);
+      await p.getByRole('textbox', { name: 'Name', exact: true }).fill('Jonas Vega');
+      await p.getByRole('textbox', { name: 'Email', exact: true }).fill('drew.cooper@example.com');
+      await p.getByRole('button', { name: 'Add employee', exact: true }).click();
+      await expect(p.getByText('Drew Cooper already uses this email.')).toBeVisible();
+    },
+  },
+  {
+    name: '5.3 Employee added',
+    owner: 'C',
+    route: '/add-employee',
+    act: async (p) => {
+      await p.getByRole('textbox', { name: 'Name', exact: true }).fill('Jonas Vega');
+      await p.getByRole('textbox', { name: 'Email', exact: true }).fill('jonas.vega@example.com');
+      await p.getByRole('combobox', { name: 'Department' }).selectOption('Engineering');
+      await p.getByRole('button', { name: 'Add employee', exact: true }).click();
+      await expect(p.getByText('Jonas Vega joined Engineering.')).toBeVisible();
     },
   },
   { name: 'Design system', owner: 'C', route: '/design-system' },

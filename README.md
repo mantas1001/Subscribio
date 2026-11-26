@@ -4,11 +4,8 @@ A web app for the CEO or admin of a small company to manage the company's softwa
 subscriptions. Team project for MNG261 at ISM University, rebuilt in code from the Subscribio
 Figma prototype.
 
-> **Target change: desktop web page.** Everything must now be done for a computer web page
-> used in a desktop browser, not a 440 px phone column. Flows, states and the store stay the
-> same; this is a layout change. Navigation and target widths are being agreed in
-> [issue #10](https://github.com/mantas1001/Subscribio/issues/10). Until then, notes below
-> about "mobile-first" and "440 px" describe the current build, not the target.
+> **Desktop target.** Subscribio uses a sidebar and a wider workspace at 1024 px and above.
+> The target review widths are 1280 and 1440 px. See [issue #10](https://github.com/mantas1001/Subscribio/issues/10).
 
 Source of truth for the design is the Figma file
 `https://www.figma.com/design/MUCNmwo5em7ccPfXSGJ6Rt/Untitled` (file key
@@ -21,7 +18,7 @@ All names, emails and prices in the app are invented example data. The app shows
 
 ## Run it
 
-Needs Node.js 20 or newer (LTS recommended; tested on Node 22).
+Requires Node.js 20.19+ or 22.12+. Use an LTS release.
 
 ```bash
 npm install
@@ -39,7 +36,7 @@ and up to 1100 px content. Mobile (<1024 px) keeps 440 px phone layout/bottom ba
 - Vite + React + TypeScript + Tailwind CSS. React Router with `HashRouter`.
 - No backend, no login. State lives in a React context with `useReducer`, saved to
   `localStorage`. `useStore()` returns state plus `approveRequest`, `declineRequest`,
-  `recordPurchase`, `cancelSubscription`, `addEmployee({ name, email })` (duplicate email error,
+  `recordPurchase`, `cancelSubscription`, `addEmployee({ name, email, role? })` (duplicate email error,
   case-insensitive), `resetExampleData`, and derived values `monthlySpend`, `annualizedSpend`
   (monthly × 12), `activeSubscriptionCount`, `activeSeatCount`, `pendingRequestCount`,
   `renewalsWithin30Days`, computed live and never hard-coded.
@@ -91,17 +88,17 @@ States covered: default, pressed, disabled, error, focus; `Input` default/error/
 
 ## Job 3 — Add employee (Role C)
 
-`/add-employee` (frames 5.1–5.3): labelled `Name` + `Email`, client validation, clear and
+`/add-employee` (frames 5.1–5.3): labelled `Name`, `Email`, and an optional `Department`, client validation, clear and
 recoverable duplicate-email error via `addEmployee` (case-insensitive), `aria-busy` loading,
 success confirmation, and the new employee added to shared state so it appears in the Employees
 list. `+ Add employee` on the Employees screen is a secondary (outlined) button placed below
-the list (Role B). No extra fields are added; `addEmployee` only takes `{ name, email }`.
+the list (Role B). The form saves the department as the employee’s role.
 
 ## Browser regression test
 
 Run `npx playwright install chromium` once, then run `npm run test:e2e`.
-The test builds the production app and checks that a recorded purchase stays active
-after cancelling a different subscription and reloading the Overview.
+The suite builds the production app, checks core workflows in Chromium, and runs automated
+accessibility scans at phone and desktop widths.
 
 ## Git workflow
 
