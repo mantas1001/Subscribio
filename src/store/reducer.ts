@@ -8,6 +8,7 @@ export type Action =
   | { type: 'recordPurchase'; id: string; amountEur?: number; purchaseDate?: string }
   | { type: 'cancelSubscription'; id: string }
   | { type: 'addEmployee'; name: string; email: string; role?: string; id: string }
+  | { type: 'addSubscription'; subscription: Subscription; employeeId: string }
   | { type: 'reset' };
 
 export function reducer(state: AppState, action: Action): AppState {
@@ -74,6 +75,19 @@ export function reducer(state: AppState, action: Action): AppState {
           },
         ],
       };
+
+    case 'addSubscription': {
+      if (!state.employees.some((e) => e.id === action.employeeId)) return state;
+      return {
+        ...state,
+        subscriptions: [...state.subscriptions, action.subscription],
+        employees: state.employees.map((e) =>
+          e.id === action.employeeId
+            ? { ...e, subscriptionIds: [...e.subscriptionIds, action.subscription.id] }
+            : e,
+        ),
+      };
+    }
 
     case 'reset':
       return structuredClone(exampleData);

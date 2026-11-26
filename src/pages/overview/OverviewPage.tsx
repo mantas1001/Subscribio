@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { formatEur, formatEurShort, formatShortDate, plural, useStore } from '../../store';
 import { ToolTile } from '../requests/parts';
+import LinkButton from '../../components/ui/LinkButton';
 
 // Frame 1.1 Overview. Frames 1.2 (after purchase) and 1.3 (after cancel) are the same
 // page: every number below is derived live from the shared store.
@@ -137,6 +138,16 @@ export default function OverviewPage() {
           )}
         </div>
       </section>
+
+      {/* Enter your own data: secondary actions, below the content (like "+ Add employee" on 3.1). */}
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <LinkButton to="/add-subscription" variant="secondary" className="w-full sm:w-auto">
+          + Add subscription
+        </LinkButton>
+        <LinkButton to="/add-employee" variant="secondary" className="w-full sm:w-auto">
+          + Add employee
+        </LinkButton>
+      </div>
 
       <button
         type="button"

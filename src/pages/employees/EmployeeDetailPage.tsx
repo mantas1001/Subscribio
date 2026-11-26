@@ -2,6 +2,7 @@ import Card from '../../components/ui/Card';
 import EmployeeListLink from './EmployeeListLink';
 import Badge from '../../components/ui/Badge';
 import EmptyState from '../../components/ui/EmptyState';
+import LinkButton from '../../components/ui/LinkButton';
 import ErrorMessage from '../../components/ui/ErrorMessage';
 import RoleBLayout, { ToolLogo } from './RoleBLayout';
 import { activeTools, compactMoney, displayDate, initials, money, monthlyTotal,
@@ -66,6 +67,10 @@ export default function EmployeeDetailPage({ employeeId, employees, subscription
               </ul>
             </Card>
           )}
+          <LinkButton to={`/add-subscription?employee=${encodeURIComponent(employee.id)}`} variant="secondary"
+            className="mt-3 w-full lg:w-auto">
+            + Add subscription
+          </LinkButton>
         </section>
       </div>
     </RoleBLayout>

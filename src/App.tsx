@@ -4,6 +4,7 @@ import AppShell from './components/layout/AppShell';
 import OverviewPage from './pages/overview/OverviewPage';
 import { EmployeesRoute, EmployeeDetailRoute, SubscriptionRoute } from './pages/employees/RoleBRoutes';
 import AddEmployeePage from './pages/add-employee/AddEmployeePage';
+import AddSubscriptionPage from './pages/subscriptions/AddSubscriptionPage';
 import DesignSystemPage from './pages/design-system/DesignSystemPage';
 import RequestsPage from './pages/requests/RequestsPage';
 import RequestDetailPage from './pages/requests/RequestDetailPage';
@@ -24,6 +25,7 @@ import RequestDeclinedPage from './pages/requests/RequestDeclinedPage';
 //   3.2 Employee detail                 → /employees/:employeeId   (Role B)
 //   4.1–4.4 Renewal detail / cancel     → /subscriptions/:subscriptionId (Role B)
 //   5.1–5.3 Add team member             → /add-employee            (Role C)
+//   Add subscription (no Figma frame)   → /add-subscription?employee=<id>  (built like 5.1–5.3)
 //   Design system                       → /design-system           (Role C)
 export default function App() {
   return (
@@ -39,6 +41,7 @@ export default function App() {
             <Route path="requests/:requestId/recorded" element={<PurchaseRecordedPage />} />
             <Route path="requests/:requestId/declined" element={<RequestDeclinedPage />} />
             <Route path="add-employee" element={<AddEmployeePage />} />
+            <Route path="add-subscription" element={<AddSubscriptionPage />} />
             <Route path="design-system" element={<DesignSystemPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
