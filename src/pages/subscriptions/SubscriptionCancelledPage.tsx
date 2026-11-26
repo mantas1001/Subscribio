@@ -10,8 +10,8 @@ export default function SubscriptionCancelledPage({ subscriptionId, employees, s
   const navigate = useNavigate();
   const subscription = subscriptions.find(item => item.id === subscriptionId);
   const valid = subscription?.status === 'cancelled';
-  const names = employees.filter(employee => employee.subscriptionIds.includes(subscriptionId))
-    .map(employee => employee.name).join(', ');
+  const owners = employees.filter(employee => employee.subscriptionIds.includes(subscriptionId));
+  const names = new Intl.ListFormat('en', { type: 'conjunction' }).format(owners.map(employee => employee.name));
   return (
     <RoleBLayout tabs={false} footer={<>
       <Button variant="primary" className="rb-full-width" onClick={() => navigate('/')}>Back to overview</Button>
@@ -22,7 +22,7 @@ export default function SubscriptionCancelledPage({ subscriptionId, employees, s
       {valid ? <div className="rb-result">
         <SuccessMark />
         <h1>{toolName(subscription)} cancelled</h1>
-        <p className="rb-muted">{names || 'The team'} {names.includes(',') ? 'keep' : 'keeps'} access until{' '}
+        <p className="rb-muted">{names || 'The team'} {owners.length > 1 ? 'keep' : 'keeps'} access until{' '}
           {displayDate(subscription.renewalDate)}. It will not renew.</p>
         <Details rows={[
           ['Status', 'Cancelled'],
