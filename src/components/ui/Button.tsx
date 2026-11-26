@@ -9,7 +9,7 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const base =
-  'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-md border px-4 py-3 text-base font-semibold leading-none transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50 disabled:pointer-events-none aria-invalid:border-danger lg:px-5';
+  'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-md border px-4 py-3 text-base font-semibold leading-none whitespace-nowrap select-none transition-[color,background-color,border-color,transform] duration-150 ease-out active:translate-y-px focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50 disabled:pointer-events-none aria-invalid:border-danger lg:px-5';
 
 const variants: Record<ButtonVariant, string> = {
   primary:

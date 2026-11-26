@@ -58,13 +58,13 @@ export default function RequestDetailPage() {
         <DetailTable
           rows={[
             ['Employee', employee?.name ?? 'Unknown'],
-            ['Department', employee?.role ?? '—'],
+            ['Department', employee?.role ?? 'Not set'],
             ['Cost', `${formatEur(request.monthlyCostEur)} / month`],
             [
               'Spend if approved',
               `${formatEur(monthlySpend + request.monthlyCostEur)} / month  (+${formatEurShort(request.monthlyCostEur)})`,
             ],
-            ['Requested', request.requestedAt ? formatLongDate(request.requestedAt) : '—'],
+            ['Requested', request.requestedAt ? formatLongDate(request.requestedAt) : 'Not recorded'],
           ]}
         />
 

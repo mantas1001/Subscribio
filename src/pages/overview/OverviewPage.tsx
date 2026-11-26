@@ -1,12 +1,15 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { formatEur, formatEurShort, formatShortDate, plural, useStore } from '../../store';
-import { ToolTile } from '../requests/parts';
+import { Sheet, ToolTile } from '../requests/parts';
+import Button from '../../components/ui/Button';
 import LinkButton from '../../components/ui/LinkButton';
 
 // Frame 1.1 Overview. Frames 1.2 (after purchase) and 1.3 (after cancel) are the same
 // page: every number below is derived live from the shared store.
 export default function OverviewPage() {
   const store = useStore();
+  const [resetOpen, setResetOpen] = useState(false);
   const {
     monthlySpend,
     annualizedSpend,
@@ -35,7 +38,7 @@ export default function OverviewPage() {
 
       <Link
         to="/requests"
-        className="flex items-center justify-center rounded-lg bg-brand p-4 text-base font-medium text-surface lg:self-start lg:px-8"
+        className="flex items-center justify-center rounded-lg bg-brand p-4 text-base font-medium text-surface transition-[background-color,transform] duration-150 hover:bg-brand-ink active:translate-y-px lg:self-start lg:px-8"
       >
         {pendingRequestCount > 0
           ? `Review ${plural(pendingRequestCount, 'pending request')}`
@@ -69,7 +72,7 @@ export default function OverviewPage() {
       <div className="flex gap-3 lg:contents">
         <Link
           to="/employees"
-          className="flex flex-1 flex-col gap-1.5 rounded-xl border border-line bg-surface p-4"
+          className="flex flex-1 flex-col gap-1.5 rounded-xl border border-line bg-surface p-4 transition-[border-color,background-color] duration-150 hover:border-brand-accent hover:bg-canvas"
         >
           <span className="text-small text-muted">Team members</span>
           <span className="flex items-end gap-1.5">
@@ -80,7 +83,7 @@ export default function OverviewPage() {
         </Link>
         <Link
           to="/requests"
-          className="flex flex-1 flex-col gap-1.5 rounded-xl border border-warn-line bg-warn-bg p-4"
+          className="flex flex-1 flex-col gap-1.5 rounded-xl border border-warn-line bg-warn-bg p-4 transition-[border-color] duration-150 hover:border-warn-ink/50"
         >
           <span className="text-small text-muted">Pending requests</span>
           <span className="flex items-end gap-1.5">
@@ -119,7 +122,10 @@ export default function OverviewPage() {
             <ul>
               {renewalsWithin30Days.map((s) => (
                 <li key={s.id} className="border-b border-line last:border-b-0">
-                  <Link to={`/subscriptions/${s.id}`} className="flex items-center gap-3 px-4 py-3.5">
+                  <Link
+                    to={`/subscriptions/${s.id}`}
+                    className="flex items-center gap-3 px-4 py-3.5 transition-[background-color] duration-150 hover:bg-canvas"
+                  >
                     <ToolTile tool={s.tool} size="sm" />
                     <span className="flex flex-1 flex-col gap-0.5">
                       <span className="text-base font-medium text-brand-ink">{s.tool}</span>
@@ -151,13 +157,33 @@ export default function OverviewPage() {
 
       <button
         type="button"
-        onClick={() => {
-          if (window.confirm('Reset all example data to the starting state?')) store.resetExampleData();
-        }}
-        className="self-center rounded-sm px-2 py-1 text-caption text-muted underline underline-offset-2"
+        onClick={() => setResetOpen(true)}
+        className="self-center rounded-sm px-2 py-1 text-caption text-muted underline underline-offset-2 transition-[color] duration-150 hover:text-brand-ink"
       >
         Reset example data
       </button>
+
+      {/* App-styled confirmation instead of the browser's confirm() box. */}
+      <Sheet
+        open={resetOpen}
+        onClose={() => setResetOpen(false)}
+        title="Reset example data?"
+        description="Everything you added or changed is removed, and the example from the Figma prototype comes back. This cannot be undone."
+      >
+        <Button
+          variant="danger"
+          className="w-full"
+          onClick={() => {
+            store.resetExampleData();
+            setResetOpen(false);
+          }}
+        >
+          Reset example data
+        </Button>
+        <Button variant="secondary" className="w-full" onClick={() => setResetOpen(false)}>
+          Keep my data
+        </Button>
+      </Sheet>
     </div>
   );
 }
