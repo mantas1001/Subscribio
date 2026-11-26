@@ -3,6 +3,8 @@ import { StoreProvider } from './store';
 import AppShell from './components/layout/AppShell';
 import OverviewPage from './pages/overview/OverviewPage';
 import ComingSoon from './pages/ComingSoon';
+import AddEmployeePage from './pages/add-employee/AddEmployeePage';
+import DesignSystemPage from './pages/design-system/DesignSystemPage';
 
 // Routes (Figma frame → path). Owners replace their ComingSoon entry with the real page.
 //   1.1 / 1.2 / 1.3 Overview           → /                        (Role A)
@@ -34,14 +36,8 @@ export default function App() {
               path="subscriptions/:subscriptionId"
               element={<ComingSoon title="Renewal" owner="Role B" back="/" />}
             />
-            <Route
-              path="add-employee"
-              element={<ComingSoon title="Add team member" owner="Role C" back="/employees" />}
-            />
-            <Route
-              path="design-system"
-              element={<ComingSoon title="Design system" owner="Role C" back="/" />}
-            />
+            <Route path="add-employee" element={<AddEmployeePage />} />
+            <Route path="design-system" element={<DesignSystemPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
