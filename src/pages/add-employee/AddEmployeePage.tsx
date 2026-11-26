@@ -1,10 +1,9 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../../store';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
-import ErrorMessage from '../../components/ui/ErrorMessage';
 import Input from '../../components/ui/Input';
 import Toast from '../../components/ui/Toast';
 import TopBar from '../../components/ui/TopBar';
@@ -24,22 +23,23 @@ export default function AddEmployeePage() {
   const [email, setEmail] = useState('');
   const [nameError, setNameError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
-  const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [added, setAdded] = useState<Employee | null>(null);
 
   const emailRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    if (emailError && !submitting) emailRef.current?.focus();
+  }, [emailError, submitting]);
+
   function clearMessages() {
     setNameError(null);
     setEmailError(null);
-    setFormError(null);
     setAdded(null);
   }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setFormError(null);
     setNameError(null);
     setEmailError(null);
     setAdded(null);
@@ -69,9 +69,10 @@ export default function AddEmployeePage() {
 
       if (!result.ok) {
         // Recoverable: keep input, surface error, allow retry after editing.
-        setEmailError(result.error);
-        setFormError(result.error);
-        emailRef.current?.focus();
+        const message = result.existing
+          ? `${result.existing.name} already uses this email.`
+          : result.error;
+        setEmailError(message);
         return;
       }
 
@@ -118,8 +119,6 @@ export default function AddEmployeePage() {
           </>
         )}
 
-        {formError && !emailError && <ErrorMessage title="Couldn’t add employee" message={formError} />}
-
         <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4" aria-busy={submitting}>
           <Card className="flex flex-col gap-4">
             <Input
@@ -129,7 +128,6 @@ export default function AddEmployeePage() {
               onChange={(e) => {
                 setName(e.target.value);
                 if (nameError) setNameError(null);
-                if (formError) setFormError(null);
               }}
               error={nameError ?? undefined}
               autoComplete="name"
@@ -146,7 +144,6 @@ export default function AddEmployeePage() {
               onChange={(e) => {
                 setEmail(e.target.value);
                 if (emailError) setEmailError(null);
-                if (formError) setFormError(null);
               }}
               error={emailError ?? undefined}
               autoComplete="email"
