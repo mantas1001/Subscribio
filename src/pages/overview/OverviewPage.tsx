@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { formatEur, formatEurShort, formatShortDate, plural, useStore } from '../../store';
+import { ToolTile } from '../requests/parts';
 
 // Frame 1.1 Overview. Frames 1.2 (after purchase) and 1.3 (after cancel) are the same
 // page: every number below is derived live from the shared store.
@@ -115,12 +116,7 @@ export default function OverviewPage() {
               {renewalsWithin30Days.map((s) => (
                 <li key={s.id} className="border-b border-line last:border-b-0">
                   <Link to={`/subscriptions/${s.id}`} className="flex items-center gap-3 px-4 py-3.5">
-                    <span
-                      aria-hidden="true"
-                      className="flex size-10 items-center justify-center rounded-md border border-line bg-brand-soft text-[17px] font-semibold text-brand"
-                    >
-                      {s.tool.charAt(0)}
-                    </span>
+                    <ToolTile tool={s.tool} size="sm" />
                     <span className="flex flex-1 flex-col gap-0.5">
                       <span className="text-base font-medium text-brand-ink">{s.tool}</span>
                       <span className="text-caption text-muted">{ownerOf(s.id) ?? 'Company'}</span>
