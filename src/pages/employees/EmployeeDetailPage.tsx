@@ -1,4 +1,8 @@
-import { Card, ListRow, Badge, EmptyState, ErrorMessage } from './RoleBControls';
+import Card from '../../components/ui/Card';
+import EmployeeListLink from './EmployeeListLink';
+import Badge from '../../components/ui/Badge';
+import EmptyState from '../../components/ui/EmptyState';
+import ErrorMessage from '../../components/ui/ErrorMessage';
 import RoleBLayout, { ToolLogo } from './RoleBLayout';
 import { activeTools, compactMoney, displayDate, initials, money, monthlyTotal,
   subscriptionPath, toolName, type LoadState, type RoleBData } from './roleBModels';
@@ -44,16 +48,20 @@ export default function EmployeeDetailPage({ employeeId, employees, subscription
       {tools.length === 0 ? (
         <EmptyState title="No active subscriptions" description={`${employee.name} has no active tools assigned.`} />
       ) : (
-        <Card className="rb-list" role="group" aria-label={`${employee.name}'s subscriptions`}>
-          {tools.map(subscription => (
-            <ListRow key={subscription.id} to={subscriptionPath(subscription.id)}>
-              <ToolLogo tool={toolName(subscription)} />
-              <span className="rb-list-copy"><span className="rb-row-title">{toolName(subscription)}</span>
-                <span className="rb-row-subtitle">Renews {displayDate(subscription.renewalDate)}</span></span>
-              <span className="rb-row-price">{money(subscription.monthlyCostEur)}</span>
-              <Badge>Active</Badge>
-            </ListRow>
-          ))}
+        <Card className="rb-list">
+          <ul aria-label={`${employee.name}'s subscriptions`}>
+            {tools.map(subscription => (
+              <EmployeeListLink key={subscription.id} to={subscriptionPath(subscription.id)}
+                leading={<ToolLogo tool={toolName(subscription)} />}
+                trailing={<span className="flex flex-wrap items-center justify-end gap-2">
+                  <span className="rb-row-price">{money(subscription.monthlyCostEur)}</span>
+                  <Badge tone="success">Active</Badge>
+                </span>}>
+                <span className="rb-list-copy"><span className="rb-row-title">{toolName(subscription)}</span>
+                  <span className="rb-row-subtitle">Renews {displayDate(subscription.renewalDate)}</span></span>
+              </EmployeeListLink>
+            ))}
+          </ul>
         </Card>
       )}
     </RoleBLayout>

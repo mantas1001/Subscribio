@@ -9,12 +9,16 @@
 .rb-main h2 { margin: 0; font-size: 18px; line-height: 22px; font-weight: 600; }
 .rb-main p { margin: 0; }
 .rb-muted { color: theme(colors.muted); font-size: 15px; line-height: 18px; }
-.rb-full-width { width: 100%; }
+.rb-full-width { width: 100%; min-height: 52px; border-radius: theme(borderRadius.lg); }
 .rb-shell--actions-tabs .rb-footer { bottom: theme(spacing.tabbar); }
 .rb-footer { position: fixed; z-index: 20; width: min(100%, 440px); bottom: 0; padding-bottom: env(safe-area-inset-bottom); background: theme(colors.surface); }
 .rb-actions { display: flex; flex-direction: column; gap: 10px; padding: 12px 16px; border-top: 1px solid theme(colors.line); }
-.rb-employee-list > a { min-height: 73px; }
-.rb-list > a:focus-visible { outline-offset: -3px; }
+.rb-list { padding: 0; }
+.rb-linked-row { position: relative; }
+.rb-employee-list .rb-linked-row { min-height: 73px; }
+.rb-row-link::after { position: absolute; inset: 0; content: ''; }
+.rb-row-link:focus-visible { outline: none; }
+.rb-row-link:focus-visible::after { outline: 2px solid theme(colors.brand.DEFAULT); outline-offset: -3px; }
 .rb-list-copy { display: flex; flex: 1 1 0; min-width: 0; flex-direction: column; gap: 2px; }
 .rb-row-title { font-size: 16px; line-height: 19px; font-weight: 500; overflow-wrap: anywhere; }
 .rb-row-subtitle { color: theme(colors.muted); font-size: 13px; line-height: 16px; overflow-wrap: anywhere; }

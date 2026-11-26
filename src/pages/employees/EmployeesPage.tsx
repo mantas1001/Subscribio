@@ -1,5 +1,9 @@
 import { useNavigate } from 'react-router-dom';
-import { Button, Card, ListRow, EmptyState, ErrorMessage } from './RoleBControls';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import EmployeeListLink from './EmployeeListLink';
+import EmptyState from '../../components/ui/EmptyState';
+import ErrorMessage from '../../components/ui/ErrorMessage';
 import RoleBLayout from './RoleBLayout';
 import { activeTools, employeePath, initials, money, monthlyTotal,
   type LoadState, type RoleBData } from './roleBModels';
@@ -17,22 +21,24 @@ export default function EmployeesPage({ employees, subscriptions, loading, error
       ) : employees.length === 0 ? (
         <EmptyState title="No employees yet" description="Add an employee to start tracking their tools." />
       ) : (
-        <Card className="rb-list rb-employee-list" role="group" aria-label="Employees">
-          {employees.map(employee => {
-            const tools = activeTools(employee, subscriptions);
-            return (
-              <ListRow key={employee.id} to={employeePath(employee.id)}>
-                <span className="rb-avatar" aria-hidden="true">{initials(employee.name)}</span>
-                <span className="rb-list-copy">
-                  <span className="rb-row-title">{employee.name}</span>
-                  <span className="rb-row-subtitle">{employee.role && `${employee.role} · `}
-                    {tools.length} {tools.length === 1 ? 'tool' : 'tools'}</span>
-                </span>
-                <span className="rb-list-price"><span>{money(monthlyTotal(tools))}</span>
-                  <span className="rb-price-period">/month</span></span>
-              </ListRow>
-            );
-          })}
+        <Card className="rb-list">
+          <ul className="rb-employee-list" aria-label="Employees">
+            {employees.map(employee => {
+              const tools = activeTools(employee, subscriptions);
+              return (
+                <EmployeeListLink key={employee.id} to={employeePath(employee.id)}
+                  leading={<span className="rb-avatar" aria-hidden="true">{initials(employee.name)}</span>}
+                  trailing={<span className="rb-list-price"><span>{money(monthlyTotal(tools))}</span>
+                    <span className="rb-price-period">/month</span></span>}>
+                  <span className="rb-list-copy">
+                    <span className="rb-row-title">{employee.name}</span>
+                    <span className="rb-row-subtitle">{employee.role && `${employee.role} · `}
+                      {tools.length} {tools.length === 1 ? 'tool' : 'tools'}</span>
+                  </span>
+                </EmployeeListLink>
+              );
+            })}
+          </ul>
         </Card>
       )}
       <Button variant="secondary" className="rb-full-width" onClick={() => navigate('/add-employee')}>
