@@ -20,7 +20,7 @@ export default function RoleBLayout({ children, title, backTo, footer, tabs = tr
   return (
     <div className={`rb-shell rb-shell--${layout}`}>
       {title ? (
-        <header className="rb-header grid grid-cols-[1fr_auto_1fr] items-center gap-2 border-b border-line bg-surface px-gutter">
+        <header className="rb-header grid grid-cols-[1fr_auto_1fr] items-center gap-2 border-b border-line bg-surface px-gutter lg:border-0 lg:bg-transparent">
           {backTo && <Link to={backTo} className="flex min-h-11 items-center gap-1 text-brand"><span aria-hidden="true">‹</span> Back</Link>}
           <span className="col-start-2 font-semibold">{title}</span>
           <span className="justify-self-end rounded-full border border-warn-line bg-warn-bg px-2 py-0.5 text-[11px] text-warn-ink lg:hidden">Example data</span>

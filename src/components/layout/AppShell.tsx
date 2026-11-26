@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { NavLink, Outlet, useLocation, matchPath } from 'react-router-dom';
+import { ClipboardText, SquaresFour, UsersThree, type Icon } from '@phosphor-icons/react';
 import { useStore } from '../../store';
 
 // App frame.
@@ -100,83 +101,109 @@ export default function AppShell({ customChrome = false }: { customChrome?: bool
 /** Desktop navigation (lg and wider). Replaces the logo header and the bottom tab bar. */
 function Sidebar() {
   const { pendingRequestCount } = useStore();
-  const item = ({ isActive }: { isActive: boolean }) =>
-    `flex items-center gap-3 rounded-lg px-3 py-2.5 text-base ${
-      isActive ? 'bg-brand-soft font-semibold text-brand' : 'text-brand-ink hover:bg-canvas'
-    }`;
   return (
-    <aside className="sticky top-0 hidden h-screen w-sidebar shrink-0 flex-col gap-8 border-r border-line bg-surface px-4 py-6 lg:flex">
-      <Logo />
-      <nav aria-label="Main">
-        <ul className="flex flex-col gap-1">
-          <li>
-            <NavLink to="/" end className={item}>
-              <OverviewIcon />
-              Overview
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/employees" className={item}>
-              <EmployeesIcon />
-              Employees
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/requests" className={item}>
-              <RequestsIcon count={0} />
-              <span className="flex-1">Requests</span>
-              {pendingRequestCount > 0 && (
-                <span className="rounded-full bg-brand px-2 py-0.5 text-caption font-medium text-surface">
+    <aside className="sticky top-0 hidden h-[100dvh] w-sidebar shrink-0 flex-col border-r border-line bg-surface px-3 py-5 lg:flex">
+      <div className="px-2.5">
+        <Logo />
+      </div>
+      <nav aria-label="Main" className="mt-8">
+        <ul className="flex flex-col gap-0.5">
+          <SidebarItem to="/" end label="Overview" icon={SquaresFour} />
+          <SidebarItem to="/employees" label="Employees" icon={UsersThree} />
+          <SidebarItem
+            to="/requests"
+            label="Requests"
+            icon={ClipboardText}
+            trailing={
+              pendingRequestCount > 0 ? (
+                <span className="ml-auto min-w-[22px] rounded-xs bg-brand px-1.5 py-0.5 text-center text-label font-semibold text-surface">
                   {pendingRequestCount}
                   <span className="sr-only"> pending</span>
                 </span>
-              )}
-            </NavLink>
-          </li>
+              ) : null
+            }
+          />
         </ul>
       </nav>
-      <span className="mt-auto self-start rounded-full border border-warn-line bg-warn-bg px-2 py-0.5 text-caption font-medium text-warn-ink">
-        Example data
-      </span>
+      <div className="mt-auto rounded-lg border border-line bg-canvas p-3">
+        <span className="inline-flex rounded-xs border border-warn-line bg-warn-bg px-2 py-0.5 text-label font-medium text-warn-ink">
+          Example data
+        </span>
+        <p className="mt-2 text-caption text-muted">
+          Sample company data so you can try every flow. Reset it any time from the Overview.
+        </p>
+      </div>
     </aside>
+  );
+}
+
+function SidebarItem({
+  to,
+  label,
+  icon: Icon,
+  end,
+  trailing,
+}: {
+  to: string;
+  label: string;
+  icon: Icon;
+  end?: boolean;
+  trailing?: ReactNode;
+}) {
+  return (
+    <li>
+      <NavLink
+        to={to}
+        end={end}
+        className={({ isActive }) =>
+          `group flex h-10 items-center gap-3 rounded-md px-2.5 text-small font-medium transition-[background-color,color] duration-150 ${
+            isActive ? 'bg-brand-soft text-brand' : 'text-muted hover:bg-canvas hover:text-brand-ink'
+          }`
+        }
+      >
+        {({ isActive }) => (
+          <>
+            <Icon size={20} weight={isActive ? 'fill' : 'regular'} aria-hidden="true" />
+            <span>{label}</span>
+            {trailing}
+          </>
+        )}
+      </NavLink>
+    </li>
+  );
+}
+
+function LogoMark() {
+  return (
+    <span
+      aria-hidden="true"
+      className="flex size-[30px] shrink-0 flex-col items-center justify-center gap-0.5 rounded-sm bg-brand shadow-button"
+    >
+      <span className="h-[3px] w-[10px] rounded-[1.5px] bg-surface" />
+      <span className="h-[3px] w-[14px] rounded-[1.5px] bg-surface" />
+    </span>
   );
 }
 
 function Logo() {
   return (
-    <span className="flex items-center gap-0.5 px-1">
-      <span
-        aria-hidden="true"
-        className="mr-1 flex size-[30px] flex-col items-center justify-center gap-0.5 rounded-sm bg-brand"
-      >
-        <span className="h-[3px] w-[10px] rounded-[1.5px] bg-surface" />
-        <span className="h-[3px] w-[14px] rounded-[1.5px] bg-surface" />
-      </span>
-      <span className="text-[20px] font-bold text-brand">subscribio</span>
-      <span aria-hidden="true" className="text-[20px] font-bold text-brand-accent">
-        .
+    <span className="flex items-center gap-2">
+      <LogoMark />
+      <span className="text-[19px] font-bold tracking-[-0.02em] text-brand">
+        subscribio<span aria-hidden="true" className="text-brand-accent">.</span>
       </span>
     </span>
   );
 }
 
+/** Phone header (below lg): logo and the example-data label. */
 export function Header() {
   return (
-    <header className="sticky top-0 z-10 border-b border-line bg-surface lg:hidden">
-      <div className="flex h-header items-center gap-0.5 px-gutter">
-        <span
-          aria-hidden="true"
-          className="mr-1 flex size-[30px] flex-col items-center justify-center gap-0.5 rounded-sm bg-brand"
-        >
-          <span className="h-[3px] w-[10px] rounded-[1.5px] bg-surface" />
-          <span className="h-[3px] w-[14px] rounded-[1.5px] bg-surface" />
-        </span>
-        <span className="text-[20px] font-bold text-brand">subscribio</span>
-        <span aria-hidden="true" className="text-[20px] font-bold text-brand-accent">
-          .
-        </span>
+    <header className="sticky top-0 z-10 border-b border-line bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/85 lg:hidden">
+      <div className="flex h-header items-center gap-2 px-gutter">
+        <Logo />
         <span className="flex-1" />
-        <span className="rounded-full border border-warn-line bg-warn-bg px-2 py-0.5 text-caption font-medium text-warn-ink">
+        <span className="rounded-xs border border-warn-line bg-warn-bg px-2 py-0.5 text-label font-medium text-warn-ink">
           Example data
         </span>
       </div>
@@ -184,20 +211,22 @@ export function Header() {
   );
 }
 
+/** Phone tab bar (below lg). */
 export function TabBar({ activeTab }: { activeTab?: 'overview' | 'employees' }) {
   const { pendingRequestCount } = useStore();
   return (
     <nav
       aria-label="Main"
-      className="fixed bottom-0 left-1/2 z-10 w-full max-w-app -translate-x-1/2 border-t border-line bg-surface lg:hidden"
+      className="fixed bottom-0 left-1/2 z-10 w-full max-w-app -translate-x-1/2 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur supports-[backdrop-filter]:bg-surface/85 lg:hidden"
     >
-      <ul className="flex h-tabbar gap-2">
-        <Tab to="/" end label="Overview" active={activeTab === 'overview'} icon={<OverviewIcon />} />
-        <Tab to="/employees" label="Employees" active={activeTab === 'employees'} icon={<EmployeesIcon />} />
+      <ul className="flex h-tabbar">
+        <Tab to="/" end label="Overview" active={activeTab === 'overview'} icon={SquaresFour} />
+        <Tab to="/employees" label="Employees" active={activeTab === 'employees'} icon={UsersThree} />
         <Tab
           to="/requests"
           label="Requests"
-          icon={<RequestsIcon count={pendingRequestCount} />}
+          icon={ClipboardText}
+          count={pendingRequestCount}
           srExtra={pendingRequestCount > 0 ? `, ${pendingRequestCount} pending` : undefined}
         />
       </ul>
@@ -208,17 +237,19 @@ export function TabBar({ activeTab }: { activeTab?: 'overview' | 'employees' }) 
 function Tab({
   to,
   label,
-  icon,
+  icon: Icon,
   end,
   srExtra,
   active,
+  count = 0,
 }: {
   to: string;
   label: string;
-  icon: React.ReactNode;
+  icon: Icon;
   end?: boolean;
   srExtra?: string;
   active?: boolean;
+  count?: number;
 }) {
   return (
     <li className="flex-1">
@@ -226,58 +257,28 @@ function Tab({
         to={to}
         end={end}
         className={({ isActive }) =>
-          `flex h-full flex-col items-center justify-center gap-[3px] text-[12px] ${
-            isActive || active ? 'font-semibold text-brand' : 'text-muted'
+          `flex h-full flex-col items-center justify-center gap-1 text-[12px] transition-[color] duration-150 ${
+            isActive || active ? 'font-semibold text-brand' : 'text-muted hover:text-brand-ink'
           }`
         }
       >
-        {icon}
-        <span>
-          {label}
-          {srExtra && <span className="sr-only">{srExtra}</span>}
-        </span>
+        {({ isActive }) => (
+          <>
+            <span aria-hidden="true" className="relative">
+              <Icon size={24} weight={isActive || active ? 'fill' : 'regular'} />
+              {count > 0 && (
+                <span className="absolute -right-2 -top-1.5 flex size-[17px] items-center justify-center rounded-full border-[1.5px] border-surface bg-brand text-[10px] font-semibold text-surface">
+                  {count}
+                </span>
+              )}
+            </span>
+            <span>
+              {label}
+              {srExtra && <span className="sr-only">{srExtra}</span>}
+            </span>
+          </>
+        )}
       </NavLink>
     </li>
-  );
-}
-
-function OverviewIcon() {
-  return (
-    <span aria-hidden="true" className="flex size-6 items-center justify-center">
-      <span className="grid size-5 grid-cols-2 gap-[3px]">
-        {[0, 1, 2, 3].map((i) => (
-          <span key={i} className="rounded-[2px] border-[1.8px] border-current" />
-        ))}
-      </span>
-    </span>
-  );
-}
-
-function EmployeesIcon() {
-  return (
-    <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.8" />
-      <path
-        d="M4.5 20c0-3.6 3.4-6 7.5-6s7.5 2.4 7.5 6"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function RequestsIcon({ count }: { count: number }) {
-  return (
-    <span aria-hidden="true" className="relative flex size-6 items-center justify-center">
-      <span className="flex h-[21px] w-[17px] items-center justify-center rounded-[4px] border-[1.8px] border-current text-[11px] font-bold">
-        ✓
-      </span>
-      {count > 0 && (
-        <span className="absolute -top-[7px] left-3 flex size-[17px] items-center justify-center rounded-[9px] border-[1.5px] border-surface bg-brand text-[10px] font-medium text-surface">
-          {count}
-        </span>
-      )}
-    </span>
   );
 }
