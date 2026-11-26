@@ -34,7 +34,7 @@ export default function OverviewPage() {
 
       <Link
         to="/requests"
-        className="flex items-center justify-center rounded-lg bg-brand p-4 text-base font-medium text-surface"
+        className="flex items-center justify-center rounded-lg bg-brand p-4 text-base font-medium text-surface lg:self-start lg:px-8"
       >
         {pendingRequestCount > 0
           ? `Review ${plural(pendingRequestCount, 'pending request')}`
@@ -42,7 +42,9 @@ export default function OverviewPage() {
         <span aria-hidden="true">&nbsp;&nbsp;→</span>
       </Link>
 
-      <div className="flex gap-3">
+      {/* Phone: two rows of two cards (Figma 1.1). Desktop: one row of four. */}
+      <div className="flex flex-col gap-3 lg:grid lg:grid-cols-4">
+      <div className="flex gap-3 lg:contents">
         <div className="flex flex-1 flex-col gap-1.5 rounded-xl border border-brand bg-brand p-4">
           <p className="text-small text-brand-on-dark">Monthly spend</p>
           <p className="flex items-end gap-1.5">
@@ -63,7 +65,7 @@ export default function OverviewPage() {
         </div>
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex gap-3 lg:contents">
         <Link
           to="/employees"
           className="flex flex-1 flex-col gap-1.5 rounded-xl border border-line bg-surface p-4"
@@ -91,6 +93,7 @@ export default function OverviewPage() {
             <span aria-hidden="true">&nbsp;&nbsp;→</span>
           </span>
         </Link>
+      </div>
       </div>
 
       <div className="rounded-lg border border-line bg-brand-soft px-4 py-3.5">
