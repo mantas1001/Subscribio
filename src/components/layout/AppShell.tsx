@@ -22,6 +22,7 @@ const NO_TABBAR_ROUTES = [
   '/requests/:requestId/approved',
   '/requests/:requestId/recorded',
   '/requests/:requestId/declined',
+  '/add-employee', // frames 5.1–5.3: one bottom action, no tab bar
 ];
 
 const matches = (patterns: string[], pathname: string) =>

@@ -2,16 +2,21 @@ import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DEPARTMENT_OPTIONS, useStore } from '../../store';
+import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Input from '../../components/ui/Input';
-import Toast from '../../components/ui/Toast';
 import TopBar from '../../components/ui/TopBar';
+import { Header } from '../../components/layout/AppShell';
+import { ActionBar, StatusIcon, initials } from '../requests/parts';
 import type { Employee } from '../../types';
 
-// Job 3 (Role C): Add employee, frames 5.1–5.3.
-// 5.1 form, 5.2 clear recoverable duplicate-email error, 5.3 success confirmation.
-// Uses the shared store's addEmployee (duplicate email is case-insensitive).
+// Job 3: Add employee, built from Figma frames
+//   5.1 Add team member  – form: Full name, Work email, Department; one "Add employee" action
+//   5.2 Duplicate email  – banner + field message naming who uses the email;
+//                          actions "Use a different email" / "See all team members"
+//   5.3 Team member added – confirmation with the new person's card and "New" badge
+// Uses the shared store's addEmployee (duplicate email check is case-insensitive).
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -24,198 +29,199 @@ export default function AddEmployeePage() {
   const [department, setDepartment] = useState('');
   const [nameError, setNameError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
+  const [duplicate, setDuplicate] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [added, setAdded] = useState<Employee | null>(null);
 
   const emailRef = useRef<HTMLInputElement>(null);
 
+  // After an email error, put the cursor back in the email field (once it is enabled again).
   useEffect(() => {
     if (emailError && !submitting) emailRef.current?.focus();
   }, [emailError, submitting]);
 
-  function clearMessages() {
+  async function onSubmit(event?: FormEvent<HTMLFormElement>) {
+    event?.preventDefault();
     setNameError(null);
     setEmailError(null);
-    setAdded(null);
-  }
-
-  async function onSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setNameError(null);
-    setEmailError(null);
-    setAdded(null);
+    setDuplicate(false);
 
     const cleanName = name.trim();
     const cleanEmail = email.trim();
     let valid = true;
-
     if (!cleanName) {
-      setNameError('Enter a name.');
+      setNameError('Enter their full name.');
       valid = false;
     }
     if (!cleanEmail) {
-      setEmailError('Enter an email address.');
+      setEmailError('Enter their work email.');
       valid = false;
     } else if (!EMAIL_RE.test(cleanEmail)) {
-      setEmailError('Enter a valid email address.');
+      setEmailError('Enter a valid email address, like name@example.com.');
       valid = false;
     }
     if (!valid) return;
 
     setSubmitting(true);
     try {
-      // Let the loading state render; no backend call.
-      await Promise.resolve();
+      await new Promise((resolve) => setTimeout(resolve, 350)); // short "Adding…" state, no backend
       const result = addEmployee({ name: cleanName, email: cleanEmail, role: department || undefined });
-
       if (!result.ok) {
-        // Recoverable: keep input, surface error, allow retry after editing.
-        const message = result.existing
-          ? `${result.existing.name} already uses this email.`
-          : result.error;
-        setEmailError(message);
+        // 5.2: recoverable. Keep everything typed, explain who already uses the email.
+        setDuplicate(Boolean(result.existing));
+        setEmailError(
+          result.existing ? `This email is already used by ${result.existing.name}.` : result.error,
+        );
         return;
       }
-
       setAdded(result.employee);
-      setName('');
-      setEmail('');
-      setDepartment('');
     } finally {
       setSubmitting(false);
     }
   }
 
-  return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 pb-6 pt-4">
-      <TopBar
-        title="Add employee"
-        onBack={() => navigate('/employees')}
-        backLabel="Back"
-        className="px-gutter lg:px-0"
-      />
-
-      <div className="flex flex-col gap-4 px-gutter pt-4 lg:px-0">
-        <div>
-          <h1 className="text-title font-semibold text-brand-ink">Add employee</h1>
-          <p className="mt-1 text-body text-muted">
-            Add a team member. They’ll appear in your employee list. All data is example data.
+  // 5.3 Team member added
+  if (added) {
+    return (
+      <>
+        <Header />
+        <div className="flex flex-col gap-4 px-gutter pt-6 lg:max-w-2xl" role="status">
+          <StatusIcon tone="success" />
+          <h1 className="text-title font-semibold text-brand-ink">Employee added</h1>
+          <p className="text-body text-muted">
+            {added.role ? `${added.name} joined ${added.role}.` : `${added.name} was added to your team.`}
+          </p>
+          <Card className="flex items-center gap-3">
+            <span
+              aria-hidden="true"
+              className="flex size-11 shrink-0 items-center justify-center rounded-full bg-brand-soft text-small font-medium text-brand"
+            >
+              {initials(added.name)}
+            </span>
+            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+              <span className="text-base font-semibold text-brand-ink">{added.name}</span>
+              <span className="truncate text-small text-muted">{added.email}</span>
+            </span>
+            <Badge tone="success">New</Badge>
+          </Card>
+          <p className="text-caption text-muted">
+            They have no subscriptions yet. They can send requests from their own app.
           </p>
         </div>
+        <ActionBar>
+          <Button className="w-full" onClick={() => navigate('/employees')}>
+            Back to employees
+          </Button>
+          <Button variant="secondary" className="w-full" onClick={() => navigate('/')}>
+            Back to overview
+          </Button>
+        </ActionBar>
+      </>
+    );
+  }
 
-        {added && (
-          <div className="grid gap-4 md:grid-cols-2">
-            <Toast
-              variant="success"
-              title="Employee added"
-              message={added.role ? `${added.name} joined ${added.role}.` : `${added.name} has been added to your employee list.`}
-              onDismiss={() => setAdded(null)}
-            />
-            <Card>
-              <p className="text-small font-medium text-brand-ink">What happens next</p>
-              <p className="mt-1 text-small text-muted">
-                Open Employees to see {added.name}. No subscriptions are added until tools are
-                requested and purchased.
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <Button variant="secondary" onClick={() => navigate('/employees')}>
-                  Back to employees
-                </Button>
-                <Button variant="secondary" onClick={() => navigate('/')}>
-                  Back to overview
-                </Button>
-              </div>
-            </Card>
+  // 5.1 form, with 5.2 shown in place when the email is already used
+  return (
+    <>
+      <TopBar title="Add employee" onBack={() => navigate('/employees')} />
+      <form
+        id="add-employee-form"
+        onSubmit={onSubmit}
+        noValidate
+        aria-busy={submitting}
+        className="flex flex-col gap-4 px-gutter pt-5 lg:max-w-xl"
+      >
+        <div className="flex flex-col gap-1">
+          <h2 className="text-title font-semibold text-brand-ink">Add an employee</h2>
+          <p className="text-body text-muted">You can then assign subscriptions to them.</p>
+        </div>
+
+        {duplicate && (
+          <div className="rounded-lg border border-danger-line bg-danger-soft px-4 py-3" role="alert">
+            <p className="text-body text-danger">An employee with this email already exists.</p>
           </div>
         )}
 
-        <form
-          onSubmit={onSubmit}
-          noValidate
-          className="mx-auto flex w-full max-w-xl flex-col gap-4"
-          aria-busy={submitting}
-        >
-          <Card className="flex flex-col gap-4">
-            <Input
-              label="Name"
-              name="name"
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-                if (nameError) setNameError(null);
-              }}
-              error={nameError ?? undefined}
-              autoComplete="name"
-              required
-              disabled={submitting}
-              placeholder="e.g. Sam Rivera"
-            />
-            <Input
-              ref={emailRef}
-              label="Email"
-              name="email"
-              type="email"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                if (emailError) setEmailError(null);
-              }}
-              error={emailError ?? undefined}
-              autoComplete="email"
-              required
-              disabled={submitting}
-              placeholder="name@example.com"
-              inputMode="email"
-            />
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="employee-department" className="text-small font-medium text-brand-ink">
-                Department
-              </label>
-              <select
-                id="employee-department"
-                value={department}
-                onChange={(event) => setDepartment(event.target.value)}
-                disabled={submitting}
-                className="min-h-[44px] rounded-md border border-line bg-surface px-3 py-2.5 text-base text-brand-ink disabled:opacity-50"
-              >
-                <option value="">Select a department</option>
-                {DEPARTMENT_OPTIONS.map((option) => <option key={option}>{option}</option>)}
-              </select>
-            </div>
-          </Card>
+        <Input
+          label="Full name"
+          name="name"
+          value={name}
+          onChange={(e) => {
+            setName(e.target.value);
+            if (nameError) setNameError(null);
+          }}
+          error={nameError ?? undefined}
+          autoComplete="name"
+          disabled={submitting}
+          placeholder="e.g. Sam Rivera"
+        />
+        <Input
+          ref={emailRef}
+          label="Work email"
+          name="email"
+          type="email"
+          inputMode="email"
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            if (emailError) setEmailError(null);
+            if (duplicate) setDuplicate(false); // editing the email brings back "Add employee"
+          }}
+          error={emailError ?? undefined}
+          autoComplete="email"
+          disabled={submitting}
+          placeholder="name@example.com"
+          className={emailError ? '!bg-danger-soft' : ''}
+        />
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="employee-department" className="text-small font-medium text-brand-ink">
+            Department
+          </label>
+          <select
+            id="employee-department"
+            value={department}
+            onChange={(event) => setDepartment(event.target.value)}
+            disabled={submitting}
+            className="min-h-[44px] rounded-md border border-line bg-surface px-3 py-2.5 text-base text-brand-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-50"
+          >
+            <option value="">Choose a department (optional)</option>
+            {DEPARTMENT_OPTIONS.map((option) => (
+              <option key={option}>{option}</option>
+            ))}
+          </select>
+        </div>
+      </form>
 
+      <ActionBar>
+        {duplicate ? (
+          <>
+            <Button
+              className="w-full"
+              onClick={() => {
+                setEmail('');
+                setEmailError(null);
+                setDuplicate(false);
+                emailRef.current?.focus();
+              }}
+            >
+              Use a different email
+            </Button>
+            <Button variant="secondary" className="w-full" onClick={() => navigate('/employees')}>
+              See all team members
+            </Button>
+          </>
+        ) : (
           <Button
             type="submit"
-            variant="primary"
+            form="add-employee-form"
+            className="w-full"
             disabled={submitting}
             aria-busy={submitting}
-            className="w-full sm:w-auto sm:self-start"
           >
             {submitting ? 'Adding…' : 'Add employee'}
           </Button>
-          <Button
-            variant="secondary"
-            onClick={() => navigate('/employees')}
-            disabled={submitting}
-            className="w-full sm:w-auto sm:self-start"
-          >
-            Cancel
-          </Button>
-          <button
-            type="button"
-            onClick={() => {
-              clearMessages();
-              setName('');
-              setEmail('');
-              setDepartment('');
-            }}
-            className="self-center rounded-sm px-2 py-1 text-caption text-muted underline underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-            disabled={submitting}
-          >
-            Clear form
-          </button>
-        </form>
-      </div>
-    </div>
+        )}
+      </ActionBar>
+    </>
   );
 }
