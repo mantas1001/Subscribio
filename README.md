@@ -32,3 +32,9 @@ The app uses `HashRouter` and a relative base path, so `dist/` works on any stat
 | `src/pages/add-employee/`, `src/pages/design-system/` | Job 3 and design system | Role C |
 
 Role C will extend this README with the design tokens and credits.
+
+### Browser regression test
+
+Run `npx playwright install chromium` once, then run `npm run test:e2e`.
+The test builds the production app and checks that a recorded purchase stays active
+after cancelling a different subscription and reloading the Overview.
