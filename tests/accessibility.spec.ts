@@ -114,6 +114,16 @@ const screens: Screen[] = [
     },
   },
   { name: 'Design system', owner: 'C', route: '/design-system' },
+  {
+    name: 'Empty workspace (after reset)',
+    owner: 'A',
+    route: '/',
+    change: (s) => {
+      s.subscriptions.length = 0;
+      s.requests.length = 0;
+      (s as unknown as { employees: unknown[] }).employees.length = 0;
+    },
+  },
   { name: 'Add subscription', owner: 'A', route: '/add-subscription' },
   {
     name: 'Add subscription errors',

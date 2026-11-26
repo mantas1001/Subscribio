@@ -100,7 +100,7 @@ export default function AppShell({ customChrome = false }: { customChrome?: bool
 
 /** Desktop navigation (lg and wider). Replaces the logo header and the bottom tab bar. */
 function Sidebar() {
-  const { pendingRequestCount } = useStore();
+  const { pendingRequestCount, hasExampleData } = useStore();
   return (
     <aside className="sticky top-0 hidden h-[100dvh] w-sidebar shrink-0 flex-col border-r border-line bg-surface px-3 py-5 lg:flex">
       <div className="px-2.5">
@@ -125,14 +125,16 @@ function Sidebar() {
           />
         </ul>
       </nav>
-      <div className="mt-auto rounded-lg border border-line bg-canvas p-3">
-        <span className="inline-flex rounded-xs border border-warn-line bg-warn-bg px-2 py-0.5 text-label font-medium text-warn-ink">
-          Example data
-        </span>
-        <p className="mt-2 text-caption text-muted">
-          Sample company data so you can try every flow. Reset it any time from the Overview.
-        </p>
-      </div>
+      {hasExampleData && (
+        <div className="mt-auto rounded-lg border border-line bg-canvas p-3">
+          <span className="inline-flex rounded-xs border border-warn-line bg-warn-bg px-2 py-0.5 text-label font-medium text-warn-ink">
+            Example data
+          </span>
+          <p className="mt-2 text-caption text-muted">
+            Sample company data so you can try every flow. Reset everything to zero from the Overview.
+          </p>
+        </div>
+      )}
     </aside>
   );
 }
@@ -198,14 +200,17 @@ function Logo() {
 
 /** Phone header (below lg): logo and the example-data label. */
 export function Header() {
+  const { hasExampleData } = useStore();
   return (
     <header className="sticky top-0 z-10 border-b border-line bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/85 lg:hidden">
       <div className="flex h-header items-center gap-2 px-gutter">
         <Logo />
         <span className="flex-1" />
-        <span className="rounded-xs border border-warn-line bg-warn-bg px-2 py-0.5 text-label font-medium text-warn-ink">
-          Example data
-        </span>
+        {hasExampleData && (
+          <span className="rounded-xs border border-warn-line bg-warn-bg px-2 py-0.5 text-label font-medium text-warn-ink">
+            Example data
+          </span>
+        )}
       </div>
     </header>
   );

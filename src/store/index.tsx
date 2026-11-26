@@ -18,6 +18,14 @@ export * from './format';
 
 const STORAGE_KEY = 'subscribio-state-v1';
 
+/** Ids of the rows that come from the example data (plus the subscription a recorded example purchase creates). */
+const EXAMPLE_IDS = new Set([
+  ...exampleData.employees.map((e) => e.id),
+  ...exampleData.subscriptions.map((s) => s.id),
+  ...exampleData.requests.map((r) => r.id),
+  ...exampleData.requests.map((r) => `sub-${r.id}`),
+]);
+
 export type AddEmployeeInput = {
   name: string;
   email: string;
@@ -76,7 +84,14 @@ export type Store = AppState & {
   cancelSubscription: (id: string) => void;
   addEmployee: (input: AddEmployeeInput) => AddEmployeeResult;
   addSubscription: (input: AddSubscriptionInput) => AddSubscriptionResult;
+  /** Brings back the Figma example (Drew Cooper, Ahrefs, the ChatGPT request). Same as loadExampleData. */
   resetExampleData: () => void;
+  /** Replaces everything with the Figma example data. */
+  loadExampleData: () => void;
+  /** Removes all employees, subscriptions and requests; every total becomes 0. */
+  clearAllData: () => void;
+  /** True while any of the example rows is still present (drives the "Example data" label). */
+  hasExampleData: boolean;
   // derived values (always computed from state, never hard-coded)
   monthlySpend: number;
   annualizedSpend: number;
@@ -176,6 +191,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       addEmployee,
       addSubscription,
       resetExampleData: () => dispatch({ type: 'reset' }),
+      loadExampleData: () => dispatch({ type: 'reset' }),
+      clearAllData: () => dispatch({ type: 'clear' }),
+      hasExampleData:
+        state.employees.some((e) => EXAMPLE_IDS.has(e.id)) ||
+        state.subscriptions.some((s) => EXAMPLE_IDS.has(s.id)) ||
+        state.requests.some((r) => EXAMPLE_IDS.has(r.id)),
       monthlySpend,
       annualizedSpend: monthlySpend * 12,
       activeSubscriptionCount: active.length,
