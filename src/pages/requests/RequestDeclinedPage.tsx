@@ -1,5 +1,5 @@
 import { Navigate, useParams } from 'react-router-dom';
-import { ActionBar, LocalLinkButton, RequestNotFound, StatusIcon, useRequest } from './parts';
+import { ActionBar, LinkButton, RequestNotFound, StatusIcon, useRequest } from './parts';
 
 // Frame 2.8 Request declined.
 export default function RequestDeclinedPage() {
@@ -24,7 +24,7 @@ export default function RequestDeclinedPage() {
         </div>
       </div>
       <ActionBar>
-        <LocalLinkButton to="/requests">Back to requests</LocalLinkButton>
+        <LinkButton to="/requests">Back to requests</LinkButton>
       </ActionBar>
     </>
   );
