@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    @apply bg-canvas text-brand-ink font-sans antialiased;
+  }
+
+  /* Visible focus for keyboard users everywhere. */
+  :focus-visible {
+    @apply outline outline-2 outline-offset-2 outline-brand;
+  }
+}
