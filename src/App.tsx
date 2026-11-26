@@ -3,7 +3,8 @@ import { StoreProvider } from './store';
 import AppShell from './components/layout/AppShell';
 import OverviewPage from './pages/overview/OverviewPage';
 import { EmployeesRoute, EmployeeDetailRoute, SubscriptionRoute } from './pages/employees/RoleBRoutes';
-import ComingSoon from './pages/ComingSoon';
+import AddEmployeePage from './pages/add-employee/AddEmployeePage';
+import DesignSystemPage from './pages/design-system/DesignSystemPage';
 import RequestsPage from './pages/requests/RequestsPage';
 import RequestDetailPage from './pages/requests/RequestDetailPage';
 import RequestApprovedPage from './pages/requests/RequestApprovedPage';
@@ -37,14 +38,8 @@ export default function App() {
             <Route path="requests/:requestId/purchase" element={<ReadyToPurchasePage />} />
             <Route path="requests/:requestId/recorded" element={<PurchaseRecordedPage />} />
             <Route path="requests/:requestId/declined" element={<RequestDeclinedPage />} />
-            <Route
-              path="add-employee"
-              element={<ComingSoon title="Add team member" owner="Role C" back="/employees" />}
-            />
-            <Route
-              path="design-system"
-              element={<ComingSoon title="Design system" owner="Role C" back="/" />}
-            />
+            <Route path="add-employee" element={<AddEmployeePage />} />
+            <Route path="design-system" element={<DesignSystemPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
           <Route element={<AppShell customChrome />}>
