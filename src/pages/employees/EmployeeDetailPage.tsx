@@ -50,7 +50,7 @@ export default function EmployeeDetailPage({ employeeId, employees, subscription
           {tools.length === 0 ? (
             <EmptyState title="No active subscriptions" description={`${employee.name} has no active tools assigned.`} />
           ) : (
-            <Card className="rb-list">
+            <Card className="rb-list !p-0">
               <ul aria-label={`${employee.name}'s subscriptions`}>
                 {tools.map(subscription => (
                   <EmployeeListLink key={subscription.id} to={subscriptionPath(subscription.id)}
