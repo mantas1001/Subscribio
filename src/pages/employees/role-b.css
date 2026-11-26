@@ -54,7 +54,6 @@
 .rb-detail-row dd { margin: 0; flex: 1 1 0; min-width: 0; font-size: 15px; line-height: 18px; font-weight: 500; overflow-wrap: anywhere; }
 .rb-note { padding: 14px 16px; border: 1px solid theme(colors.line); border-radius: 12px; font-size: 15px; line-height: 18px; font-weight: 500; color: theme(colors.brand.DEFAULT); background: theme(colors.brand.soft); }
 .rb-note--warning { color: theme(colors.warn.ink); background: theme(colors.warn.bg); border-color: theme(colors.warn.line); }
-.rb-danger-outline { background: theme(colors.surface) !important; color: theme(colors.danger.DEFAULT) !important; border: 1px solid theme(colors.danger.line) !important; }
 .rb-result > .rb-muted { max-width: 385px; }
 .rb-result { display: flex; flex-direction: column; gap: 18px; }
 .rb-success-mark { display: flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 50%; font-size: 30px; line-height: 36px; font-weight: 700; background: theme(colors.brand.soft); color: theme(colors.brand.DEFAULT); }

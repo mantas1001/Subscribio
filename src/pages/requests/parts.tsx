@@ -1,37 +1,10 @@
 import { useEffect, useRef, type ReactNode } from 'react';
-import { Link } from 'react-router-dom';
 import { useStore } from '../../store';
+import LinkButton from '../../components/ui/LinkButton';
 
-// Request-flow pieces that the shared kit (src/components/ui/, Role C) does not have.
-// Buttons, badges, top bar, cards, inputs and the empty state come from the shared kit.
-
-// Same look as the shared Button (src/components/ui/Button.tsx), but rendered as a link,
-// because these actions navigate. Ask Role C to add a link option to Button, then delete this.
-const linkButtonBase =
-  'inline-flex w-full min-h-[44px] items-center justify-center gap-2 rounded-md border px-4 py-3 text-base font-semibold leading-none transition-colors';
-const linkButtonVariants = {
-  primary: 'border-brand bg-brand text-surface hover:bg-brand-ink hover:border-brand-ink',
-  secondary: 'border-line bg-surface text-brand-ink hover:bg-brand-soft',
-} as const;
-
-export function LinkButton({
-  to,
-  variant = 'primary',
-  children,
-}: {
-  to: string;
-  variant?: keyof typeof linkButtonVariants;
-  children: ReactNode;
-}) {
-  return (
-    <Link to={to} className={`${linkButtonBase} ${linkButtonVariants[variant]}`}>
-      {children}
-    </Link>
-  );
-}
-
-/** Outlined red style for "Decline" (frame 2.2); the shared Button has only a filled danger variant. */
-export const declineButtonClass = 'w-full !border-danger-line !text-danger hover:!bg-danger-soft';
+// Request-flow pieces that the shared kit (src/components/ui/) does not have:
+// ActionBar, Sheet, ToolTile, StatusIcon, DetailTable. Buttons, links, badges, top bar,
+// cards, inputs and the empty state come from the shared kit.
 
 /**
  * The screen's main actions. Phone: fixed to the bottom (above the tab bar when shown).
@@ -166,7 +139,7 @@ export function RequestNotFound() {
       <p className="text-body text-muted">
         This request no longer exists. It may have been removed when the example data was reset.
       </p>
-      <LinkButton to="/requests">Back to requests</LinkButton>
+      <LinkButton className="w-full" to="/requests">Back to requests</LinkButton>
     </div>
   );
 }

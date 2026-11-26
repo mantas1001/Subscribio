@@ -1,6 +1,7 @@
 import { Navigate, useParams } from 'react-router-dom';
 import { formatEur, formatLongDate, useStore } from '../../store';
-import { ActionBar, DetailTable, LinkButton, RequestNotFound, StatusIcon, useRequest } from './parts';
+import LinkButton from '../../components/ui/LinkButton';
+import { ActionBar, DetailTable, RequestNotFound, StatusIcon, useRequest } from './parts';
 
 // Frame 2.6 Purchase recorded. "New monthly total" is read live from the store.
 export default function PurchaseRecordedPage() {
@@ -30,8 +31,8 @@ export default function PurchaseRecordedPage() {
         />
       </div>
       <ActionBar>
-        <LinkButton to="/">Back to overview</LinkButton>
-        <LinkButton to="/requests" variant="secondary">
+        <LinkButton className="w-full" to="/">Back to overview</LinkButton>
+        <LinkButton className="w-full" to="/requests" variant="secondary">
           See requests
         </LinkButton>
       </ActionBar>

@@ -6,6 +6,7 @@ import Card from '../../components/ui/Card';
 import EmptyState from '../../components/ui/EmptyState';
 import ErrorMessage from '../../components/ui/ErrorMessage';
 import Input from '../../components/ui/Input';
+import LinkButton from '../../components/ui/LinkButton';
 import ListRow from '../../components/ui/ListRow';
 import Toast from '../../components/ui/Toast';
 import TopBar from '../../components/ui/TopBar';
@@ -144,11 +145,19 @@ export default function DesignSystemPage() {
 
         <Section title="Button">
           <div className="flex flex-col gap-3">
-            <p className="text-small text-muted">Variants: primary, secondary, danger. States: default, pressed, disabled, error, focus.</p>
+            <p className="text-small text-muted">Variants: primary, secondary, danger, danger-outline. States: default, pressed, disabled, error, focus.</p>
             <div className="flex flex-wrap gap-2">
               <Button variant="primary">Primary</Button>
               <Button variant="secondary">Secondary</Button>
               <Button variant="danger">Danger</Button>
+              <Button variant="danger-outline">Danger outline</Button>
+            </div>
+            <p className="text-small text-muted">LinkButton: the same look for actions that only navigate (a real link).</p>
+            <div className="flex flex-wrap gap-2">
+              <LinkButton to="/design-system">Primary link</LinkButton>
+              <LinkButton to="/design-system" variant="secondary">
+                Secondary link
+              </LinkButton>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button variant="primary" aria-pressed="true">Pressed</Button>
@@ -214,7 +223,9 @@ export default function DesignSystemPage() {
 
         <Section title="BottomNav">
           <p className="text-small text-muted">Shared bottom tab bar component (app shell uses its own).</p>
+          {/* Shown in place: the real bar is fixed to the bottom of the screen. */}
           <BottomNav
+            className="!static !left-auto !z-auto !translate-x-0 overflow-hidden rounded-xl border"
             ariaLabel="Demo main"
             items={[
               { label: 'Overview', href: '#/', active: true },

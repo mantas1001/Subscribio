@@ -11,7 +11,6 @@ import {
   RequestNotFound,
   Sheet,
   ToolTile,
-  declineButtonClass,
   useRequest,
 } from './parts';
 import { useSaving } from './useSaving';
@@ -86,8 +85,8 @@ export default function RequestDetailPage() {
       <ActionBar>
         <div className="flex gap-3 lg:[&>*]:min-w-[160px]">
           <Button
-            variant="secondary"
-            className={declineButtonClass}
+            variant="danger-outline"
+            className="w-full"
             disabled={busy}
             onClick={() => setDeclineOpen(true)}
           >

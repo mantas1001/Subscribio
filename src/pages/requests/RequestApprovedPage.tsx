@@ -2,7 +2,8 @@ import { useParams } from 'react-router-dom';
 import { formatEur } from '../../store';
 import Badge from '../../components/ui/Badge';
 import Card from '../../components/ui/Card';
-import { ActionBar, LinkButton, RequestNotFound, StatusIcon, ToolTile, useRequest } from './parts';
+import LinkButton from '../../components/ui/LinkButton';
+import { ActionBar, RequestNotFound, StatusIcon, ToolTile, useRequest } from './parts';
 
 // Frame 2.3 Request approved.
 // Open issue (team decision pending): 3 of 5 test participants stopped here without
@@ -32,8 +33,8 @@ export default function RequestApprovedPage() {
         <p className="text-caption text-muted">Spend will not change until the purchase is recorded.</p>
       </div>
       <ActionBar>
-        <LinkButton to={`/requests/${request.id}/purchase`}>Go to purchase</LinkButton>
-        <LinkButton to="/requests" variant="secondary">
+        <LinkButton className="w-full" to={`/requests/${request.id}/purchase`}>Go to purchase</LinkButton>
+        <LinkButton className="w-full" to="/requests" variant="secondary">
           Back to requests
         </LinkButton>
       </ActionBar>

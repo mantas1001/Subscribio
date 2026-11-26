@@ -2,7 +2,8 @@ import { Link } from 'react-router-dom';
 import { formatEur, formatShortDate, useStore } from '../../store';
 import Badge from '../../components/ui/Badge';
 import EmptyState from '../../components/ui/EmptyState';
-import { ActionBar, LinkButton, StatusIcon, ToolTile, initials } from './parts';
+import LinkButton from '../../components/ui/LinkButton';
+import { ActionBar, StatusIcon, ToolTile, initials } from './parts';
 
 // Frame 2.1 Pending requests, with frame 2.9 "Nothing pending" as the empty state.
 // Approved requests that still need a recorded purchase stay in the list so the CEO can
@@ -27,7 +28,7 @@ export default function RequestsPage() {
             description="No requests are waiting for review. New ones appear here when a team member sends one."
           />
           <ActionBar aboveTabBar>
-            <LinkButton to="/">Back to overview</LinkButton>
+            <LinkButton className="w-full" to="/">Back to overview</LinkButton>
           </ActionBar>
         </>
       ) : (

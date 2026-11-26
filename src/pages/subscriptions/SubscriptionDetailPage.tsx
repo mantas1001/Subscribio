@@ -37,7 +37,7 @@ export default function SubscriptionDetailPage({ subscriptionId, employees, subs
   const basePath = subscriptionPath(subscriptionId);
   return (
     <RoleBLayout title="Renewal" backTo="/" activeTab="overview" footer={<>
-      <Button variant="danger" className="rb-danger-outline rb-full-width"
+      <Button variant="danger-outline" className="rb-full-width"
         onClick={() => navigate(`${basePath}/cancel`)}>Cancel subscription</Button>
       <Button variant="secondary" className="rb-full-width"
         onClick={() => navigate(`${basePath}/kept`)}>Keep it</Button>
