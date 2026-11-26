@@ -9,7 +9,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('empty form shows clear errors and moves focus to the first one', async ({ page }) => {
-  await page.getByRole('link', { name: '+ Add subscription' }).click();
+  await page.getByRole('link', { name: 'Add subscription', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Add a subscription' })).toBeVisible();
 
   await page.getByRole('button', { name: 'Add subscription', exact: true }).click();
@@ -27,7 +27,7 @@ test('empty form shows clear errors and moves focus to the first one', async ({ 
 
 test('a subscription added from an employee shows up everywhere and survives a reload', async ({ page }) => {
   await page.goto('/#/employees/emp-drew');
-  await page.getByRole('link', { name: '+ Add subscription' }).click();
+  await page.getByRole('link', { name: 'Add subscription', exact: true }).click();
 
   // Opened from Drew's page, so Drew is already chosen.
   await expect(page.getByRole('combobox', { name: 'Used by' })).toHaveValue('emp-drew');

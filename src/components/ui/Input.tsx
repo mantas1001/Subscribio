@@ -41,7 +41,7 @@ export default function Input({
         disabled={disabled}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? errorId : undefined}
-        className={`min-h-[44px] rounded-md border bg-surface px-3 py-2.5 text-base text-brand-ink placeholder:text-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-danger ${error ? 'border-danger' : 'border-line'} ${className}`.trim()}
+        className={`min-h-[44px] rounded-md border bg-surface px-3 py-2.5 text-base text-brand-ink shadow-card transition-[border-color,box-shadow] duration-150 placeholder:text-muted hover:border-line-strong focus-visible:border-brand focus-visible:shadow-[0_0_0_1px_theme(colors.brand.DEFAULT),0_0_0_5px_rgba(36,78,60,0.14)] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-danger lg:min-h-[40px] lg:text-small ${error ? 'border-danger' : 'border-line'} ${className}`.trim()}
         {...rest}
       />
       {error && (
