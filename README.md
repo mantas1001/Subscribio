@@ -1,8 +1,14 @@
 # Subscribio
 
-A mobile-first web app for the CEO or admin of a small company to manage the company's
-software subscriptions. Team project for MNG261 at ISM University, rebuilt in code from the
-Subscribio Figma prototype.
+A web app for the CEO or admin of a small company to manage the company's software
+subscriptions. Team project for MNG261 at ISM University, rebuilt in code from the Subscribio
+Figma prototype.
+
+> **Target change: desktop web page.** Everything must now be done for a computer web page
+> used in a desktop browser, not a 440 px phone column. Flows, states and the store stay the
+> same; this is a layout change. Navigation and target widths are being agreed in
+> [issue #10](https://github.com/mantas1001/Subscribio/issues/10). Until then, notes below
+> about "mobile-first" and "440 px" describe the current build, not the target.
 
 Source of truth for the design is the Figma file
 `https://www.figma.com/design/MUCNmwo5em7ccPfXSGJ6Rt/Untitled` (file key
