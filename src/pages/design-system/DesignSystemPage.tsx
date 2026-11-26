@@ -223,7 +223,9 @@ export default function DesignSystemPage() {
 
         <Section title="BottomNav">
           <p className="text-small text-muted">Shared bottom tab bar component (app shell uses its own).</p>
+          {/* Shown in place: the real bar is fixed to the bottom of the screen. */}
           <BottomNav
+            className="!static !left-auto !z-auto !translate-x-0 overflow-hidden rounded-xl border"
             ariaLabel="Demo main"
             items={[
               { label: 'Overview', href: '#/', active: true },
