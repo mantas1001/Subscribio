@@ -28,6 +28,7 @@ export default {
         danger: {
           DEFAULT: '#b3261e', // decline / cancel text
           line: '#e8b4b0', // decline / cancel outline
+          soft: '#fdecea', // declined status icon background
         },
       },
       fontFamily: {
