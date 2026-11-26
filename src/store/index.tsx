@@ -26,7 +26,8 @@ export type Store = AppState & {
   // actions
   approveRequest: (id: string) => void;
   declineRequest: (id: string) => void;
-  recordPurchase: (id: string) => void;
+  /** Optional details from the "Record the purchase" sheet; defaults to the requested cost. */
+  recordPurchase: (id: string, details?: { amountEur?: number; purchaseDate?: string }) => void;
   cancelSubscription: (id: string) => void;
   addEmployee: (input: { name: string; email: string }) => AddEmployeeResult;
   resetExampleData: () => void;
@@ -96,7 +97,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       ...state,
       approveRequest: (id) => dispatch({ type: 'approveRequest', id }),
       declineRequest: (id) => dispatch({ type: 'declineRequest', id }),
-      recordPurchase: (id) => dispatch({ type: 'recordPurchase', id }),
+      recordPurchase: (id, details) => dispatch({ type: 'recordPurchase', id, ...details }),
       cancelSubscription: (id) => dispatch({ type: 'cancelSubscription', id }),
       addEmployee,
       resetExampleData: () => dispatch({ type: 'reset' }),

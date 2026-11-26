@@ -5,7 +5,7 @@ import { addMonths } from './format';
 export type Action =
   | { type: 'approveRequest'; id: string }
   | { type: 'declineRequest'; id: string }
-  | { type: 'recordPurchase'; id: string }
+  | { type: 'recordPurchase'; id: string; amountEur?: number; purchaseDate?: string }
   | { type: 'cancelSubscription'; id: string }
   | { type: 'addEmployee'; name: string; email: string; id: string }
   | { type: 'reset' };
@@ -35,8 +35,8 @@ export function reducer(state: AppState, action: Action): AppState {
         id: `sub-${request.id}`,
         tool: request.tool,
         seats: 1,
-        monthlyCostEur: request.monthlyCostEur,
-        renewalDate: addMonths(REFERENCE_DATE, 1),
+        monthlyCostEur: action.amountEur ?? request.monthlyCostEur,
+        renewalDate: addMonths(action.purchaseDate ?? REFERENCE_DATE, 1),
         status: 'active',
       };
       return {

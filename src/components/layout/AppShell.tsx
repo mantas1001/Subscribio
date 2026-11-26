@@ -4,21 +4,38 @@ import { useStore } from '../../store';
 // App frame from Figma: fixed header (logo), scrolling content, fixed tab bar.
 // On a wide screen everything sits in a centred 440 px column.
 
-// Top-level tab screens show the logo header. Detail screens draw their own TopBar.
-const TAB_ROUTES = ['/', '/requests', '/employees'];
-// Screens with their own bottom action bar (frames 2.2–2.8) hide the tab bar.
-const NO_TABBAR_ROUTES = ['/requests/:requestId'];
+// Screens that show the logo header (as in Figma). Other detail screens draw their own TopBar.
+const HEADER_ROUTES = [
+  '/',
+  '/requests',
+  '/employees',
+  '/requests/:requestId/approved',
+  '/requests/:requestId/purchase',
+  '/requests/:requestId/recorded',
+  '/requests/:requestId/declined',
+];
+// Screens with their own bottom action bar and no tab bar in Figma.
+const NO_TABBAR_ROUTES = [
+  '/requests/:requestId',
+  '/requests/:requestId/approved',
+  '/requests/:requestId/recorded',
+  '/requests/:requestId/declined',
+];
 
-export default function AppShell() {
+const matches = (patterns: string[], pathname: string) =>
+  patterns.some((p) => matchPath(p, pathname));
+
+export default function AppShell({ customChrome = false }: { customChrome?: boolean }) {
   const { pathname } = useLocation();
-  const showHeader = TAB_ROUTES.includes(pathname);
-  const showTabBar = !NO_TABBAR_ROUTES.some((p) => matchPath(p, pathname));
+  // customChrome: Role B's screens draw their own header and tab bar (RoleBLayout).
+  const showHeader = !customChrome && matches(HEADER_ROUTES, pathname);
+  const showTabBar = !customChrome && !matches(NO_TABBAR_ROUTES, pathname);
 
   return (
     <div className="min-h-screen bg-canvas">
       <div className="relative mx-auto flex min-h-screen w-full max-w-app flex-col bg-canvas shadow-[0_0_0_1px_theme(colors.line)]">
         {showHeader && <Header />}
-        <main className={`flex-1 ${showTabBar ? 'pb-[calc(theme(spacing.tabbar)+24px)]' : 'pb-6'}`}>
+        <main className={`flex-1 ${showTabBar ? 'pb-[calc(theme(spacing.tabbar)+24px)]' : customChrome ? '' : 'pb-6'}`}>
           <Outlet />
         </main>
         {showTabBar && <TabBar />}
@@ -27,7 +44,7 @@ export default function AppShell() {
   );
 }
 
-function Header() {
+export function Header() {
   return (
     <header className="sticky top-0 z-10 border-b border-line bg-surface">
       <div className="flex h-header items-center gap-0.5 px-gutter">
@@ -51,7 +68,7 @@ function Header() {
   );
 }
 
-function TabBar() {
+export function TabBar({ activeTab }: { activeTab?: 'overview' | 'employees' }) {
   const { pendingRequestCount } = useStore();
   return (
     <nav
@@ -59,8 +76,8 @@ function TabBar() {
       className="fixed bottom-0 left-1/2 z-10 w-full max-w-app -translate-x-1/2 border-t border-line bg-surface"
     >
       <ul className="flex h-tabbar gap-2">
-        <Tab to="/" end label="Overview" icon={<OverviewIcon />} />
-        <Tab to="/employees" label="Employees" icon={<EmployeesIcon />} />
+        <Tab to="/" end label="Overview" active={activeTab === 'overview'} icon={<OverviewIcon />} />
+        <Tab to="/employees" label="Employees" active={activeTab === 'employees'} icon={<EmployeesIcon />} />
         <Tab
           to="/requests"
           label="Requests"
@@ -78,12 +95,14 @@ function Tab({
   icon,
   end,
   srExtra,
+  active,
 }: {
   to: string;
   label: string;
   icon: React.ReactNode;
   end?: boolean;
   srExtra?: string;
+  active?: boolean;
 }) {
   return (
     <li className="flex-1">
@@ -92,7 +111,7 @@ function Tab({
         end={end}
         className={({ isActive }) =>
           `flex h-full flex-col items-center justify-center gap-[3px] text-[12px] ${
-            isActive ? 'font-semibold text-brand' : 'text-muted'
+            isActive || active ? 'font-semibold text-brand' : 'text-muted'
           }`
         }
       >

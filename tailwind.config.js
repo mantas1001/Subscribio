@@ -19,6 +19,7 @@ export default {
           'accent-text': '#56744b', // eyebrow text (Figma #8aa67f)
           'on-dark': '#cfe0d4', // secondary text on brand background
         },
+        'tool-ahrefs': '#f68c3a',
         muted: '#5c6f62', // secondary text (Figma #7a8f80)
         warn: {
           bg: '#fbf7e8', // pending card background
@@ -28,6 +29,7 @@ export default {
         danger: {
           DEFAULT: '#b3261e', // decline / cancel text
           line: '#e8b4b0', // decline / cancel outline
+          soft: '#fdecea', // declined status icon background
         },
       },
       fontFamily: {
