@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'danger';
+export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'danger-outline';
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   /** Visual style. Default: primary. */
@@ -18,12 +18,21 @@ const variants: Record<ButtonVariant, string> = {
     'border-line bg-surface text-brand-ink hover:bg-brand-soft active:bg-brand-soft aria-pressed:bg-brand-soft',
   danger:
     'border-danger bg-danger text-surface hover:border-danger-line hover:bg-danger active:border-danger-line active:bg-danger aria-pressed:border-danger-line aria-pressed:bg-danger',
+  // Outlined red, e.g. "Decline" (Figma 2.2) and "Cancel subscription" (4.1).
+  'danger-outline':
+    'border-danger-line bg-surface text-danger hover:bg-danger-soft active:bg-danger-soft aria-pressed:bg-danger-soft',
 };
 
+/** Class string for the button look. Shared by Button and LinkButton so both always match. */
+export function buttonClasses(variant: ButtonVariant = 'primary', className = '') {
+  return `${base} ${variants[variant]} ${className}`.trim();
+}
+
 /**
- * Button. Variants: primary | secondary | danger. Supports disabled, pressed
+ * Button. Variants: primary | secondary | danger | danger-outline. Supports disabled, pressed
  * (`aria-pressed`), invalid/error (`aria-invalid`), and visible focus.
  * Default type is "button"; forms opt into type="submit".
+ * For navigation use LinkButton (same look, but a real link).
  */
 export default function Button({
   variant = 'primary',
@@ -33,7 +42,7 @@ export default function Button({
   ...rest
 }: ButtonProps) {
   return (
-    <button type={type} className={`${base} ${variants[variant]} ${className}`.trim()} {...rest}>
+    <button type={type} className={buttonClasses(variant, className)} {...rest}>
       {children}
     </button>
   );

@@ -1,5 +1,6 @@
 import { Navigate, useParams } from 'react-router-dom';
-import { ActionBar, LinkButton, RequestNotFound, StatusIcon, useRequest } from './parts';
+import LinkButton from '../../components/ui/LinkButton';
+import { ActionBar, RequestNotFound, StatusIcon, useRequest } from './parts';
 
 // Frame 2.8 Request declined.
 export default function RequestDeclinedPage() {
@@ -24,7 +25,7 @@ export default function RequestDeclinedPage() {
         </div>
       </div>
       <ActionBar>
-        <LinkButton to="/requests">Back to requests</LinkButton>
+        <LinkButton className="w-full" to="/requests">Back to requests</LinkButton>
       </ActionBar>
     </>
   );
