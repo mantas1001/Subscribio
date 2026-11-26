@@ -7,7 +7,7 @@ export type Action =
   | { type: 'declineRequest'; id: string }
   | { type: 'recordPurchase'; id: string; amountEur?: number; purchaseDate?: string }
   | { type: 'cancelSubscription'; id: string }
-  | { type: 'addEmployee'; name: string; email: string; id: string }
+  | { type: 'addEmployee'; name: string; email: string; role?: string; id: string }
   | { type: 'reset' };
 
 export function reducer(state: AppState, action: Action): AppState {
@@ -65,7 +65,13 @@ export function reducer(state: AppState, action: Action): AppState {
         ...state,
         employees: [
           ...state.employees,
-          { id: action.id, name: action.name, email: action.email, subscriptionIds: [] },
+          {
+            id: action.id,
+            name: action.name,
+            email: action.email,
+            ...(action.role ? { role: action.role } : {}),
+            subscriptionIds: [],
+          },
         ],
       };
 

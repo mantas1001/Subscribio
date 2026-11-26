@@ -89,6 +89,12 @@ success confirmation, and the new employee added to shared state so it appears i
 list. `+ Add employee` on the Employees screen is a secondary (outlined) button placed below
 the list (Role B). No extra fields are added; `addEmployee` only takes `{ name, email }`.
 
+## Browser regression test
+
+Run `npx playwright install chromium` once, then run `npm run test:e2e`.
+The test builds the production app and checks that a recorded purchase stays active
+after cancelling a different subscription and reloading the Overview.
+
 ## Git workflow
 
 Branches are named `a/<task>`, `b/<task>`, `c/<task>`. Never commit directly to `main` (except
