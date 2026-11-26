@@ -2,6 +2,7 @@ import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { StoreProvider } from './store';
 import AppShell from './components/layout/AppShell';
 import OverviewPage from './pages/overview/OverviewPage';
+import { EmployeesRoute, EmployeeDetailRoute, SubscriptionRoute } from './pages/employees/RoleBRoutes';
 import ComingSoon from './pages/ComingSoon';
 import RequestsPage from './pages/requests/RequestsPage';
 import RequestDetailPage from './pages/requests/RequestDetailPage';
@@ -36,15 +37,6 @@ export default function App() {
             <Route path="requests/:requestId/purchase" element={<ReadyToPurchasePage />} />
             <Route path="requests/:requestId/recorded" element={<PurchaseRecordedPage />} />
             <Route path="requests/:requestId/declined" element={<RequestDeclinedPage />} />
-            <Route path="employees" element={<ComingSoon title="Employees" owner="Role B" />} />
-            <Route
-              path="employees/:employeeId"
-              element={<ComingSoon title="Team member" owner="Role B" back="/employees" />}
-            />
-            <Route
-              path="subscriptions/:subscriptionId"
-              element={<ComingSoon title="Renewal" owner="Role B" back="/" />}
-            />
             <Route
               path="add-employee"
               element={<ComingSoon title="Add team member" owner="Role C" back="/employees" />}
@@ -54,6 +46,16 @@ export default function App() {
               element={<ComingSoon title="Design system" owner="Role C" back="/" />}
             />
             <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+          <Route element={<AppShell customChrome />}>
+            <Route path="employees" element={<EmployeesRoute />} />
+            <Route path="employees/:employeeId" element={<EmployeeDetailRoute />} />
+            <Route path="subscriptions/:subscriptionId">
+              <Route index element={<SubscriptionRoute />} />
+              <Route path="cancel" element={<SubscriptionRoute screen="confirm" />} />
+              <Route path="cancelled" element={<SubscriptionRoute screen="cancelled" />} />
+              <Route path="kept" element={<SubscriptionRoute screen="kept" />} />
+            </Route>
           </Route>
         </Routes>
       </HashRouter>
