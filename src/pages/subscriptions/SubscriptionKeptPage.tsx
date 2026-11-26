@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { Button, ErrorMessage } from '../employees/RoleBControls';
+import Button from '../../components/ui/Button';
+import ErrorMessage from '../../components/ui/ErrorMessage';
 import RoleBLayout, { Details, SuccessMark } from '../employees/RoleBLayout';
 import { displayDate, money, toolName, type RoleBData } from '../employees/roleBModels';
 import SubscriptionCancelledPage from './SubscriptionCancelledPage';

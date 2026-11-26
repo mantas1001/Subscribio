@@ -1,4 +1,5 @@
-import { Button, ErrorMessage } from '../employees/RoleBControls';
+import Button from '../../components/ui/Button';
+import ErrorMessage from '../../components/ui/ErrorMessage';
 import { useEffect, useRef, useState } from 'react';
 import type { Subscription } from '../../types';
 import { Details } from '../employees/RoleBLayout';

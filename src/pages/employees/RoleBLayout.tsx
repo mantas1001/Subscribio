@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Header, TabBar } from '../../components/layout/AppShell';
-import { Card } from './RoleBControls';
+import Card from '../../components/ui/Card';
 import './role-b.css';
 
 type Props = {
