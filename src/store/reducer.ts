@@ -9,7 +9,8 @@ export type Action =
   | { type: 'cancelSubscription'; id: string }
   | { type: 'addEmployee'; name: string; email: string; role?: string; id: string }
   | { type: 'addSubscription'; subscription: Subscription; employeeId: string }
-  | { type: 'reset' };
+  | { type: 'reset' }
+  | { type: 'clear' };
 
 export function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
@@ -91,5 +92,9 @@ export function reducer(state: AppState, action: Action): AppState {
 
     case 'reset':
       return structuredClone(exampleData);
+
+    // Empty workspace: no employees, subscriptions or requests, so every total is 0.
+    case 'clear':
+      return { subscriptions: [], employees: [], requests: [] };
   }
 }

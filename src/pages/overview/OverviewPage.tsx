@@ -6,6 +6,7 @@ import {
   ClipboardText,
   Info,
   Plus,
+  Sparkle,
   Stack,
   UserPlus,
   UsersThree,
@@ -42,6 +43,9 @@ export default function OverviewPage() {
   const ownerOf = (subscriptionId: string) =>
     employees.find((e) => e.subscriptionIds.includes(subscriptionId))?.name;
 
+  const isEmpty =
+    employees.length === 0 && subscriptions.length === 0 && store.requests.length === 0;
+
   const spendByTool = subscriptions
     .filter((s) => s.status === 'active')
     .sort((a, b) => b.monthlyCostEur - a.monthlyCostEur);
@@ -65,6 +69,34 @@ export default function OverviewPage() {
           </>
         }
       />
+
+      {/* Empty workspace (after "Reset to zero"): explain the next step instead of a page of zeros. */}
+      {isEmpty && (
+        <div className="flex flex-col gap-4 rounded-xl border border-line bg-surface p-5 shadow-card sm:flex-row sm:items-center lg:p-6">
+          <span
+            aria-hidden="true"
+            className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-brand"
+          >
+            <Sparkle size={22} weight="fill" />
+          </span>
+          <div className="min-w-0 sm:flex-1">
+            <h2 className="text-section font-semibold text-brand-ink">Your workspace is empty</h2>
+            <p className="mt-1 text-small text-muted">
+              Add your first team member and the tools they use. Or load the example data to explore
+              every flow.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <LinkButton to="/add-employee" className="w-full sm:w-auto">
+              <UserPlus size={18} aria-hidden="true" />
+              Add your first employee
+            </LinkButton>
+            <Button variant="secondary" className="w-full sm:w-auto" onClick={() => store.loadExampleData()}>
+              Load example data
+            </Button>
+          </div>
+        </div>
+      )}
 
       {pendingRequestCount > 0 && (
         <div className="flex flex-col gap-4 rounded-xl border border-warn-line bg-warn-bg p-4 sm:flex-row sm:items-center lg:px-5">
@@ -265,30 +297,32 @@ export default function OverviewPage() {
         </LinkButton>
       </div>
 
-      <button
-        type="button"
-        onClick={() => setResetOpen(true)}
-        className="self-center rounded-sm px-2 py-1 text-caption text-muted underline underline-offset-2 transition-[color] duration-150 hover:text-brand-ink lg:self-start"
-      >
-        Reset example data
-      </button>
+      {!isEmpty && (
+        <button
+          type="button"
+          onClick={() => setResetOpen(true)}
+          className="self-center rounded-sm px-2 py-1 text-caption text-muted underline underline-offset-2 transition-[color] duration-150 hover:text-brand-ink lg:self-start"
+        >
+          Reset example data
+        </button>
+      )}
 
       {/* App-styled confirmation instead of the browser's confirm() box. */}
       <Sheet
         open={resetOpen}
         onClose={() => setResetOpen(false)}
-        title="Reset example data?"
-        description="Everything you added or changed is removed, and the example from the Figma prototype comes back. This cannot be undone."
+        title="Reset all data to zero?"
+        description="All employees, subscriptions and requests are removed, and every total goes back to 0. This cannot be undone."
       >
         <Button
           variant="danger"
           className="w-full"
           onClick={() => {
-            store.resetExampleData();
+            store.clearAllData();
             setResetOpen(false);
           }}
         >
-          Reset example data
+          Reset to zero
         </Button>
         <Button variant="secondary" className="w-full" onClick={() => setResetOpen(false)}>
           Keep my data
