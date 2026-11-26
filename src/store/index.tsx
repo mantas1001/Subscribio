@@ -7,7 +7,7 @@ import {
   useReducer,
   type ReactNode,
 } from 'react';
-import type { Employee } from '../types';
+import type { Employee, Subscription } from '../types';
 import { exampleData, REFERENCE_DATE, type AppState } from './exampleData';
 import { reducer } from './reducer';
 import { daysBetween } from './format';
@@ -30,6 +30,43 @@ export type AddEmployeeResult =
   /** `existing` is set for a duplicate email, so the form can say who already uses it (frame 5.2). */
   | { ok: false; error: string; existing?: Employee };
 
+export type AddSubscriptionInput = {
+  tool: string;
+  /** Optional plan name, e.g. "Standard" (shown as "Ahrefs · Standard"). */
+  plan?: string;
+  seats: number;
+  monthlyCostEur: number;
+  /** ISO date, e.g. "2026-12-21". */
+  renewalDate: string;
+  /** Who uses it. Every subscription belongs to a team member, as in the Figma frames. */
+  employeeId: string;
+};
+
+export type AddSubscriptionField = 'tool' | 'seats' | 'monthlyCostEur' | 'renewalDate' | 'employeeId';
+
+export type AddSubscriptionResult =
+  | { ok: true; subscription: Subscription }
+  | { ok: false; errors: Partial<Record<AddSubscriptionField, string>> };
+
+/** Checks the input; returns an error message per field (empty object = valid). Pure, so it is easy to test. */
+export function validateSubscription(
+  input: AddSubscriptionInput,
+  employees: Employee[],
+): Partial<Record<AddSubscriptionField, string>> {
+  const errors: Partial<Record<AddSubscriptionField, string>> = {};
+  if (!input.tool.trim()) errors.tool = 'Enter the tool name.';
+  else if (input.tool.trim().length > 60) errors.tool = 'Keep the tool name under 60 characters.';
+  if (!Number.isInteger(input.seats) || input.seats < 1) errors.seats = 'Enter at least 1 seat.';
+  else if (input.seats > 9999) errors.seats = 'Enter 9,999 seats or fewer.';
+  if (!Number.isFinite(input.monthlyCostEur) || input.monthlyCostEur <= 0)
+    errors.monthlyCostEur = 'Enter the monthly cost in euro, for example 29.00.';
+  else if (input.monthlyCostEur > 1_000_000) errors.monthlyCostEur = 'Enter a cost under €1,000,000.';
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(input.renewalDate) || Number.isNaN(Date.parse(input.renewalDate)))
+    errors.renewalDate = 'Choose the next renewal date.';
+  if (!employees.some((e) => e.id === input.employeeId)) errors.employeeId = 'Choose who uses it.';
+  return errors;
+}
+
 export type Store = AppState & {
   // actions
   approveRequest: (id: string) => void;
@@ -38,6 +75,7 @@ export type Store = AppState & {
   recordPurchase: (id: string, details?: { amountEur?: number; purchaseDate?: string }) => void;
   cancelSubscription: (id: string) => void;
   addEmployee: (input: AddEmployeeInput) => AddEmployeeResult;
+  addSubscription: (input: AddSubscriptionInput) => AddSubscriptionResult;
   resetExampleData: () => void;
   // derived values (always computed from state, never hard-coded)
   monthlySpend: number;
@@ -104,6 +142,26 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [state.employees],
   );
 
+  const addSubscription = useCallback(
+    (input: AddSubscriptionInput): AddSubscriptionResult => {
+      const errors = validateSubscription(input, state.employees);
+      if (Object.keys(errors).length > 0) return { ok: false, errors };
+      const plan = input.plan?.trim();
+      const subscription: Subscription = {
+        id: `sub-${Date.now().toString(36)}`,
+        tool: input.tool.trim(),
+        ...(plan ? { plan } : {}),
+        seats: input.seats,
+        monthlyCostEur: Math.round(input.monthlyCostEur * 100) / 100,
+        renewalDate: input.renewalDate,
+        status: 'active',
+      };
+      dispatch({ type: 'addSubscription', subscription, employeeId: input.employeeId });
+      return { ok: true, subscription };
+    },
+    [state.employees],
+  );
+
   const value = useMemo<Store>(() => {
     const active = state.subscriptions.filter((s) => s.status === 'active');
     const pending = state.requests.filter((r) => r.status === 'pending');
@@ -116,6 +174,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       recordPurchase: (id, details) => dispatch({ type: 'recordPurchase', id, ...details }),
       cancelSubscription: (id) => dispatch({ type: 'cancelSubscription', id }),
       addEmployee,
+      addSubscription,
       resetExampleData: () => dispatch({ type: 'reset' }),
       monthlySpend,
       annualizedSpend: monthlySpend * 12,
@@ -132,7 +191,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       employeeCount: state.employees.length,
       departmentCount: departments.size,
     };
-  }, [state, addEmployee]);
+  }, [state, addEmployee, addSubscription]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }

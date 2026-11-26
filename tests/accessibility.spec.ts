@@ -114,6 +114,27 @@ const screens: Screen[] = [
     },
   },
   { name: 'Design system', owner: 'C', route: '/design-system' },
+  { name: 'Add subscription', owner: 'A', route: '/add-subscription' },
+  {
+    name: 'Add subscription errors',
+    owner: 'A',
+    route: '/add-subscription',
+    act: async (p) => {
+      await p.getByRole('button', { name: 'Add subscription', exact: true }).click();
+      await expect(p.getByText('Enter the tool name.')).toBeVisible();
+    },
+  },
+  {
+    name: 'Subscription added',
+    owner: 'A',
+    route: '/add-subscription?employee=emp-drew',
+    act: async (p) => {
+      await p.getByRole('textbox', { name: 'Tool' }).fill('Figma');
+      await p.getByRole('textbox', { name: 'Monthly cost (€)' }).fill('29');
+      await p.getByRole('button', { name: 'Add subscription', exact: true }).click();
+      await expect(p.getByRole('heading', { name: 'Subscription added' })).toBeVisible();
+    },
+  },
 ];
 
 const viewports = [
