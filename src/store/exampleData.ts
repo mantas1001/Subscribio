@@ -7,6 +7,9 @@ import type { Employee, Subscription, ToolRequest } from '../types';
 // frames 1.1, 1.2 and 1.3, whatever day it is opened.
 export const REFERENCE_DATE = '2026-11-05';
 
+/** Example department choices for the Add employee form (frame 5.1 shows "Engineering"). */
+export const DEPARTMENT_OPTIONS = ['Engineering', 'Marketing', 'Sales', 'Design', 'Operations'];
+
 export type AppState = {
   subscriptions: Subscription[];
   employees: Employee[];
