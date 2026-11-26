@@ -4,6 +4,11 @@ Source of truth: `tailwind.config.js`. Use token class names; never hard-code co
 or components. All values below are token names; check `tailwind.config.js` for exact values.
 Type scale, colours, spacing and radius are also rendered on `/design-system`.
 
+**Desktop target (issue #10):** computer web page first, 1280–1440 px; `lg` (1024 px) switches to
+left sidebar + wider content. `max-w-app` 440 px is the phone layout below `lg`; `max-w-desktop`
+1100 px and `w-sidebar` 240 px are desktop. Figma source frames are 440 px mobile; adapt in code
+unless desktop Figma frames exist. Flows, wording, states, store stay the same.
+
 ## Font
 
 - `font-sans`: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif.
@@ -49,7 +54,8 @@ Danger:
 
 - `p-gutter` 20px page padding; `gap-3` 12px; `gap-4` 16px; `p-4` 16px; `px-4` 16px; `py-3.5` 14px; `py-4` 16px; `p-8` 32px.
 - `h-header` 52px top bar; `h-tabbar` 58px bottom nav; `min-h-[44px]` minimum tap target.
-- `max-w-app` 440px app column; `w-full`; `mx-auto`.
+- `max-w-app` 440px phone column; `max-w-desktop` 1100px desktop content; `w-sidebar` 240px desktop navigation; `w-full`; `mx-auto`.
+- `lg` = 1024px breakpoint; check 1280–1440px desktop; no raw `@media` colour changes.
 - `rounded-sm` 8px; `rounded-md` 10px; `rounded-lg` 12px; `rounded-xl` 14px; `rounded-full`.
 
 ## Components
@@ -62,7 +68,7 @@ Shared in `src/components/ui/`, one file each, default-exported by name:
 - `Input.tsx`: `label`, `error`, `id`, `required`, `disabled`, `ref`, `className`, + input attributes; `aria-invalid`, `aria-describedby`, visible error; focus-visible.
 - `Badge.tsx`: `children`, `tone` `default` | `brand` | `warn` | `danger` | `success`, `className`.
 - `TopBar.tsx`: `title`, `onBack`, `backLabel`, `trailing`, `className`.
-- `BottomNav.tsx`: `items` `{ label, href, icon?, active?, count? }[]`, `ariaLabel`, `className`.
+- `BottomNav.tsx`: `items` `{ label, href, icon?, active?, count? }[]`, `ariaLabel`, `className`; mobile bottom bar; app shell uses desktop left sidebar on `lg`.
 - `EmptyState.tsx`: `title`, `description`, `action`, `icon`, `className`.
 - `ErrorMessage.tsx`: `message`, `title`, `className`, `role="alert"`.
 - `Toast.tsx`: `message`, `title`, `variant` `default` | `success` | `error`, `onDismiss`, `dismissLabel`, `role="status"`/`role="alert"`, `aria-live`.

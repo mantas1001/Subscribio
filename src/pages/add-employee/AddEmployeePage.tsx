@@ -85,10 +85,15 @@ export default function AddEmployeePage() {
   }
 
   return (
-    <div className="flex flex-col gap-4 pb-6">
-      <TopBar title="Add employee" onBack={() => navigate('/employees')} backLabel="Back" />
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 pb-6 pt-4">
+      <TopBar
+        title="Add employee"
+        onBack={() => navigate('/employees')}
+        backLabel="Back"
+        className="px-gutter lg:px-0"
+      />
 
-      <div className="flex flex-col gap-4 px-gutter pt-4">
+      <div className="flex flex-col gap-4 px-gutter pt-4 lg:px-0">
         <div>
           <h1 className="text-title font-semibold text-brand-ink">Add employee</h1>
           <p className="mt-1 text-body text-muted">
@@ -97,7 +102,7 @@ export default function AddEmployeePage() {
         </div>
 
         {added && (
-          <>
+          <div className="grid gap-4 md:grid-cols-2">
             <Toast
               variant="success"
               title="Employee added"
@@ -116,10 +121,15 @@ export default function AddEmployeePage() {
                 </Button>
               </div>
             </Card>
-          </>
+          </div>
         )}
 
-        <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4" aria-busy={submitting}>
+        <form
+          onSubmit={onSubmit}
+          noValidate
+          className="mx-auto flex w-full max-w-xl flex-col gap-4"
+          aria-busy={submitting}
+        >
           <Card className="flex flex-col gap-4">
             <Input
               label="Name"
@@ -154,10 +164,21 @@ export default function AddEmployeePage() {
             />
           </Card>
 
-          <Button type="submit" variant="primary" disabled={submitting} aria-busy={submitting}>
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={submitting}
+            aria-busy={submitting}
+            className="w-full sm:w-auto sm:self-start"
+          >
             {submitting ? 'Adding…' : 'Add employee'}
           </Button>
-          <Button variant="secondary" onClick={() => navigate('/employees')} disabled={submitting}>
+          <Button
+            variant="secondary"
+            onClick={() => navigate('/employees')}
+            disabled={submitting}
+            className="w-full sm:w-auto sm:self-start"
+          >
             Cancel
           </Button>
           <button

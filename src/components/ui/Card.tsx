@@ -7,7 +7,7 @@ type CardProps = HTMLAttributes<HTMLDivElement> & {
 /** Surface container: rounded, bordered, padded. */
 export default function Card({ className = '', children, ...rest }: CardProps) {
   return (
-    <div className={`rounded-xl border border-line bg-surface p-4 ${className}`.trim()} {...rest}>
+    <div className={`rounded-xl border border-line bg-surface p-4 lg:p-5 ${className}`.trim()} {...rest}>
       {children}
     </div>
   );

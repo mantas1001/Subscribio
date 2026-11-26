@@ -22,7 +22,7 @@ export default function TopBar({
 }: TopBarProps) {
   return (
     <header
-      className={`sticky top-0 z-10 flex min-h-header items-center gap-2 border-b border-line bg-surface px-gutter ${className}`.trim()}
+      className={`sticky top-0 z-10 flex min-h-header items-center gap-2 border-b border-line bg-surface px-gutter lg:px-0 ${className}`.trim()}
     >
       {onBack && (
         <button
