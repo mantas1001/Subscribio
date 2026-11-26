@@ -42,7 +42,7 @@ export default function ReadyToPurchasePage() {
 
   return (
     <>
-      <div className="flex flex-col gap-4 px-gutter pt-6">
+      <div className="flex flex-col gap-4 px-gutter pt-6 lg:max-w-2xl">
         <div className="flex flex-col gap-2">
           <h1 className="text-title font-semibold text-brand-ink">Ready to purchase</h1>
           <p className="text-body text-muted">

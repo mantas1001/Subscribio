@@ -31,7 +31,7 @@ export default function RequestsPage() {
           </ActionBar>
         </>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="flex flex-col gap-3 lg:grid lg:grid-cols-2">
           {open.map((r) => {
             const name = nameOf(r.employeeId);
             const to = r.status === 'pending' ? `/requests/${r.id}` : `/requests/${r.id}/purchase`;

@@ -1,8 +1,10 @@
 import { NavLink, Outlet, useLocation, matchPath } from 'react-router-dom';
 import { useStore } from '../../store';
 
-// App frame from Figma: fixed header (logo), scrolling content, fixed tab bar.
-// On a wide screen everything sits in a centred 440 px column.
+// App frame.
+// Desktop (lg, 1024 px and wider) is the main target (issue #10): a left sidebar with the
+// logo and navigation, and the page content using the width (up to 1100 px).
+// Below 1024 px the Figma phone layout stays: logo header, content column, bottom tab bar.
 
 // Screens that show the logo header (as in Figma). Other detail screens draw their own TopBar.
 const HEADER_ROUTES = [
@@ -32,11 +34,16 @@ export default function AppShell({ customChrome = false }: { customChrome?: bool
   const showTabBar = !customChrome && !matches(NO_TABBAR_ROUTES, pathname);
 
   return (
-    <div className="min-h-screen bg-canvas">
-      <div className="relative mx-auto flex min-h-screen w-full max-w-app flex-col bg-canvas shadow-[0_0_0_1px_theme(colors.line)]">
+    <div className="min-h-screen bg-canvas lg:flex">
+      <Sidebar />
+      <div className="relative mx-auto flex min-h-screen w-full max-w-app flex-col bg-canvas shadow-[0_0_0_1px_theme(colors.line)] lg:mx-0 lg:max-w-none lg:flex-1 lg:shadow-none">
         {showHeader && <Header />}
-        <main className={`flex-1 ${showTabBar ? 'pb-[calc(theme(spacing.tabbar)+24px)]' : customChrome ? '' : 'pb-6'}`}>
-          <Outlet />
+        <main
+          className={`flex-1 ${showTabBar ? 'pb-[calc(theme(spacing.tabbar)+24px)]' : customChrome ? '' : 'pb-6'} lg:pb-12`}
+        >
+          <div className="lg:mx-auto lg:max-w-desktop lg:px-6 lg:pt-6">
+            <Outlet />
+          </div>
         </main>
         {showTabBar && <TabBar />}
       </div>
@@ -44,9 +51,72 @@ export default function AppShell({ customChrome = false }: { customChrome?: bool
   );
 }
 
+/** Desktop navigation (lg and wider). Replaces the logo header and the bottom tab bar. */
+function Sidebar() {
+  const { pendingRequestCount } = useStore();
+  const item = ({ isActive }: { isActive: boolean }) =>
+    `flex items-center gap-3 rounded-lg px-3 py-2.5 text-base ${
+      isActive ? 'bg-brand-soft font-semibold text-brand' : 'text-brand-ink hover:bg-canvas'
+    }`;
+  return (
+    <aside className="sticky top-0 hidden h-screen w-sidebar shrink-0 flex-col gap-8 border-r border-line bg-surface px-4 py-6 lg:flex">
+      <Logo />
+      <nav aria-label="Main">
+        <ul className="flex flex-col gap-1">
+          <li>
+            <NavLink to="/" end className={item}>
+              <OverviewIcon />
+              Overview
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/employees" className={item}>
+              <EmployeesIcon />
+              Employees
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/requests" className={item}>
+              <RequestsIcon count={0} />
+              <span className="flex-1">Requests</span>
+              {pendingRequestCount > 0 && (
+                <span className="rounded-full bg-brand px-2 py-0.5 text-caption font-medium text-surface">
+                  {pendingRequestCount}
+                  <span className="sr-only"> pending</span>
+                </span>
+              )}
+            </NavLink>
+          </li>
+        </ul>
+      </nav>
+      <span className="mt-auto self-start rounded-full border border-warn-line bg-warn-bg px-2 py-0.5 text-caption font-medium text-warn-ink">
+        Example data
+      </span>
+    </aside>
+  );
+}
+
+function Logo() {
+  return (
+    <span className="flex items-center gap-0.5 px-1">
+      <span
+        aria-hidden="true"
+        className="mr-1 flex size-[30px] flex-col items-center justify-center gap-0.5 rounded-sm bg-brand"
+      >
+        <span className="h-[3px] w-[10px] rounded-[1.5px] bg-surface" />
+        <span className="h-[3px] w-[14px] rounded-[1.5px] bg-surface" />
+      </span>
+      <span className="text-[20px] font-bold text-brand">subscribio</span>
+      <span aria-hidden="true" className="text-[20px] font-bold text-brand-accent">
+        .
+      </span>
+    </span>
+  );
+}
+
 export function Header() {
   return (
-    <header className="sticky top-0 z-10 border-b border-line bg-surface">
+    <header className="sticky top-0 z-10 border-b border-line bg-surface lg:hidden">
       <div className="flex h-header items-center gap-0.5 px-gutter">
         <span
           aria-hidden="true"
@@ -73,7 +143,7 @@ export function TabBar({ activeTab }: { activeTab?: 'overview' | 'employees' }) 
   return (
     <nav
       aria-label="Main"
-      className="fixed bottom-0 left-1/2 z-10 w-full max-w-app -translate-x-1/2 border-t border-line bg-surface"
+      className="fixed bottom-0 left-1/2 z-10 w-full max-w-app -translate-x-1/2 border-t border-line bg-surface lg:hidden"
     >
       <ul className="flex h-tabbar gap-2">
         <Tab to="/" end label="Overview" active={activeTab === 'overview'} icon={<OverviewIcon />} />
