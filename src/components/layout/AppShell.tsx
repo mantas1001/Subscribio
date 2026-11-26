@@ -4,15 +4,32 @@ import { useStore } from '../../store';
 // App frame from Figma: fixed header (logo), scrolling content, fixed tab bar.
 // On a wide screen everything sits in a centred 440 px column.
 
-// Top-level tab screens show the logo header. Detail screens draw their own TopBar.
-const TAB_ROUTES = ['/', '/requests', '/employees'];
-// Screens with their own bottom action bar (frames 2.2–2.8) hide the tab bar.
-const NO_TABBAR_ROUTES = ['/requests/:requestId'];
+// Screens that show the logo header (as in Figma). Other detail screens draw their own TopBar.
+const HEADER_ROUTES = [
+  '/',
+  '/requests',
+  '/employees',
+  '/requests/:requestId/approved',
+  '/requests/:requestId/purchase',
+  '/requests/:requestId/recorded',
+  '/requests/:requestId/declined',
+];
+// Screens with their own bottom action bar and no tab bar in Figma.
+const NO_TABBAR_ROUTES = [
+  '/requests/:requestId',
+  '/requests/:requestId/approved',
+  '/requests/:requestId/recorded',
+  '/requests/:requestId/declined',
+];
+
+const matches = (patterns: string[], pathname: string) =>
+  patterns.some((p) => matchPath(p, pathname));
 
 export default function AppShell({ customChrome = false }: { customChrome?: boolean }) {
   const { pathname } = useLocation();
-  const showHeader = !customChrome && TAB_ROUTES.includes(pathname);
-  const showTabBar = !customChrome && !NO_TABBAR_ROUTES.some((p) => matchPath(p, pathname));
+  // customChrome: Role B's screens draw their own header and tab bar (RoleBLayout).
+  const showHeader = !customChrome && matches(HEADER_ROUTES, pathname);
+  const showTabBar = !customChrome && !matches(NO_TABBAR_ROUTES, pathname);
 
   return (
     <div className="min-h-screen bg-canvas">
