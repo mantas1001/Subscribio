@@ -33,7 +33,7 @@ export default function AppShell({ customChrome = false }: { customChrome?: bool
 
   return (
     <div className="min-h-screen bg-canvas">
-      <div className="relative mx-auto flex min-h-screen w-full max-w-app flex-col bg-canvas shadow-[0_0_0_1px_theme(colors.line)]">
+      <div className={`relative mx-auto flex min-h-screen w-full max-w-app flex-col bg-canvas shadow-[0_0_0_1px_theme(colors.line)] ${customChrome ? 'lg:max-w-none' : ''}`}>
         {showHeader && <Header />}
         <main className={`flex-1 ${showTabBar ? 'pb-[calc(theme(spacing.tabbar)+24px)]' : customChrome ? '' : 'pb-6'}`}>
           <Outlet />

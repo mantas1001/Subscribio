@@ -31,39 +31,43 @@ export default function EmployeeDetailPage({ employeeId, employees, subscription
           <p className="rb-profile-contact">{employee.role && `${employee.role} · `}{employee.email}</p>
         </div>
       </div>
-      <div className="rb-metrics">
-        <Card className="rb-metric rb-metric--primary">
-          <p className="rb-metric-label">Monthly cost</p>
-          <p className="rb-metric-amount">{compactMoney(monthlyTotal(tools))}<span>/mo</span></p>
-          <p className="rb-metric-footnote">{tools.length} active {tools.length === 1 ? 'subscription' : 'subscriptions'}</p>
-        </Card>
-        <Card className="rb-metric">
-          <p className="rb-metric-label">Department</p>
-          <p className="rb-metric-amount rb-department">{employee.role || 'Not specified'}</p>
-          <p className="rb-metric-footnote">{employee.role
-            ? `${departmentPeople} ${departmentPeople === 1 ? 'person' : 'people'}` : 'No department set'}</p>
-        </Card>
+      <div className="rb-employee-details">
+        <div className="rb-metrics">
+          <Card className="rb-metric rb-metric--primary">
+            <p className="rb-metric-label">Monthly cost</p>
+            <p className="rb-metric-amount">{compactMoney(monthlyTotal(tools))}<span>/mo</span></p>
+            <p className="rb-metric-footnote">{tools.length} active {tools.length === 1 ? 'subscription' : 'subscriptions'}</p>
+          </Card>
+          <Card className="rb-metric">
+            <p className="rb-metric-label">Department</p>
+            <p className="rb-metric-amount rb-department">{employee.role || 'Not specified'}</p>
+            <p className="rb-metric-footnote">{employee.role
+              ? `${departmentPeople} ${departmentPeople === 1 ? 'person' : 'people'}` : 'No department set'}</p>
+          </Card>
+        </div>
+        <section className="rb-assigned-subscriptions" aria-labelledby="rb-assigned-subscriptions">
+          <h2 id="rb-assigned-subscriptions">Subscriptions</h2>
+          {tools.length === 0 ? (
+            <EmptyState title="No active subscriptions" description={`${employee.name} has no active tools assigned.`} />
+          ) : (
+            <Card className="rb-list">
+              <ul aria-label={`${employee.name}'s subscriptions`}>
+                {tools.map(subscription => (
+                  <EmployeeListLink key={subscription.id} to={subscriptionPath(subscription.id)}
+                    leading={<ToolLogo tool={toolName(subscription)} />}
+                    trailing={<span className="flex flex-wrap items-center justify-end gap-2">
+                      <span className="rb-row-price">{money(subscription.monthlyCostEur)}</span>
+                      <Badge tone="success">Active</Badge>
+                    </span>}>
+                    <span className="rb-list-copy"><span className="rb-row-title">{toolName(subscription)}</span>
+                      <span className="rb-row-subtitle">Renews {displayDate(subscription.renewalDate)}</span></span>
+                  </EmployeeListLink>
+                ))}
+              </ul>
+            </Card>
+          )}
+        </section>
       </div>
-      <h2>Subscriptions</h2>
-      {tools.length === 0 ? (
-        <EmptyState title="No active subscriptions" description={`${employee.name} has no active tools assigned.`} />
-      ) : (
-        <Card className="rb-list">
-          <ul aria-label={`${employee.name}'s subscriptions`}>
-            {tools.map(subscription => (
-              <EmployeeListLink key={subscription.id} to={subscriptionPath(subscription.id)}
-                leading={<ToolLogo tool={toolName(subscription)} />}
-                trailing={<span className="flex flex-wrap items-center justify-end gap-2">
-                  <span className="rb-row-price">{money(subscription.monthlyCostEur)}</span>
-                  <Badge tone="success">Active</Badge>
-                </span>}>
-                <span className="rb-list-copy"><span className="rb-row-title">{toolName(subscription)}</span>
-                  <span className="rb-row-subtitle">Renews {displayDate(subscription.renewalDate)}</span></span>
-              </EmployeeListLink>
-            ))}
-          </ul>
-        </Card>
-      )}
     </RoleBLayout>
   );
 }

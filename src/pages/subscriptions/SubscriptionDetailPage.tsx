@@ -47,15 +47,17 @@ export default function SubscriptionDetailPage({ subscriptionId, employees, subs
         <ToolLogo tool={toolName(subscription)} large />
         <div><h1 className="rb-subscription-name">{subscription.tool}{subscription.plan && ` · ${subscription.plan}`}</h1><Badge tone="success">Active</Badge></div>
       </div>
-      <Details rows={[
-        ['Owner', ownerNames || 'No employee assigned'],
-        ['Department', department || 'Not specified'],
-        ['Cost', `${money(subscription.monthlyCostEur)} / month`],
-        ['Next charge', displayDate(subscription.renewalDate, true)],
-        ['Billing', 'Monthly'],
-      ]} />
-      <p className="rb-note rb-note--warning">{mostExpensive && 'It is your most expensive tool. '}
-        Cancelling saves {money(subscription.monthlyCostEur * 12).replace(/\.00$/, '')} a year.</p>
+      <div className="rb-renewal-details">
+        <Details rows={[
+          ['Owner', ownerNames || 'No employee assigned'],
+          ['Department', department || 'Not specified'],
+          ['Cost', `${money(subscription.monthlyCostEur)} / month`],
+          ['Next charge', displayDate(subscription.renewalDate, true)],
+          ['Billing', 'Monthly'],
+        ]} />
+        <p className="rb-note rb-note--warning">{mostExpensive && 'It is your most expensive tool. '}
+          Cancelling saves {money(subscription.monthlyCostEur * 12).replace(/\.00$/, '')} a year.</p>
+      </div>
       {confirming && <CancelSubscriptionDialog subscription={subscription} ownerNames={ownerNames}
         monthlySpend={monthlyTotal(subscriptions)} onDismiss={() => navigate(basePath, { replace: true })}
         onConfirm={async () => {
