@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { NavLink, Outlet, useLocation, matchPath } from 'react-router-dom';
 import { useStore } from '../../store';
 
@@ -29,19 +30,62 @@ const NO_TABBAR_ROUTES = [
 const matches = (patterns: string[], pathname: string) =>
   patterns.some((p) => matchPath(p, pathname));
 
+// Browser tab title per screen, so tabs, history and bookmarks say where you are.
+const PAGE_TITLES: [string, string][] = [
+  ['/', 'Overview'],
+  ['/requests', 'Requests'],
+  ['/requests/:requestId', 'Request'],
+  ['/requests/:requestId/approved', 'Request approved'],
+  ['/requests/:requestId/purchase', 'Ready to purchase'],
+  ['/requests/:requestId/recorded', 'Purchase recorded'],
+  ['/requests/:requestId/declined', 'Request declined'],
+  ['/employees', 'Employees'],
+  ['/employees/:employeeId', 'Team member'],
+  ['/subscriptions/:subscriptionId', 'Renewal'],
+  ['/subscriptions/:subscriptionId/cancel', 'Cancel subscription'],
+  ['/subscriptions/:subscriptionId/cancelled', 'Subscription cancelled'],
+  ['/subscriptions/:subscriptionId/kept', 'Subscription kept'],
+  ['/add-employee', 'Add employee'],
+  ['/add-subscription', 'Add subscription'],
+  ['/design-system', 'Design system'],
+];
+
+function usePageChrome(pathname: string) {
+  useEffect(() => {
+    const title = PAGE_TITLES.find(([pattern]) => matchPath(pattern, pathname))?.[1];
+    document.title = title ? `${title} · Subscribio` : 'Subscribio';
+    // A new screen starts at the top, like a normal page load (hash routing keeps the old scroll).
+    window.scrollTo(0, 0);
+  }, [pathname]);
+}
+
 export default function AppShell({ customChrome = false }: { customChrome?: boolean }) {
   const { pathname } = useLocation();
+  usePageChrome(pathname);
   // customChrome: Role B's screens draw their own header and tab bar (RoleBLayout).
   const showHeader = !customChrome && matches(HEADER_ROUTES, pathname);
   const showTabBar = !customChrome && !matches(NO_TABBAR_ROUTES, pathname);
 
   return (
-    <div className="min-h-screen bg-canvas lg:flex">
+    <div className="min-h-[100dvh] bg-canvas lg:flex">
+      {/* First thing a keyboard user reaches: jump past the navigation. */}
+      <a
+        href="#main"
+        onClick={(e) => {
+          e.preventDefault(); // hash routing: do not change the route, just move focus
+          document.getElementById('main')?.focus();
+        }}
+        className="sr-only z-50 rounded-md bg-brand px-4 py-2 text-small font-semibold text-surface focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
+      >
+        Skip to content
+      </a>
       <Sidebar />
-      <div className="relative mx-auto flex min-h-screen w-full max-w-app flex-col bg-canvas shadow-[0_0_0_1px_theme(colors.line)] lg:mx-0 lg:max-w-none lg:flex-1 lg:shadow-none">
+      <div className="relative mx-auto flex min-h-[100dvh] w-full max-w-app flex-col bg-canvas shadow-[0_0_0_1px_theme(colors.line)] lg:mx-0 lg:max-w-none lg:flex-1 lg:shadow-none">
         {showHeader && <Header />}
         <main
-          className={`flex-1 ${showTabBar ? 'pb-[calc(theme(spacing.tabbar)+24px)]' : customChrome ? '' : 'pb-6'} lg:pb-12`}
+          id="main"
+          tabIndex={-1}
+          className={`flex-1 outline-none ${showTabBar ? 'pb-[calc(theme(spacing.tabbar)+24px)]' : customChrome ? '' : 'pb-6'} lg:pb-12`}
         >
           <div className="lg:mx-auto lg:max-w-desktop lg:px-6 lg:pt-6">
             <Outlet />

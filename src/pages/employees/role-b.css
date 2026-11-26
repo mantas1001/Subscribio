@@ -14,7 +14,8 @@
 .rb-footer { position: fixed; z-index: 20; width: min(100%, 440px); bottom: 0; padding-bottom: env(safe-area-inset-bottom); background: theme(colors.surface); }
 .rb-actions { display: flex; flex-direction: column; gap: 10px; padding: 12px 16px; border-top: 1px solid theme(colors.line); }
 /* List cards: rows carry their own padding (ListRow); the card adds none (Card gets !p-0). */
-.rb-linked-row { position: relative; }
+.rb-linked-row { position: relative; transition: background-color 150ms ease-out; }
+.rb-linked-row:hover { background: theme(colors.canvas); }
 .rb-employee-list .rb-linked-row { min-height: 73px; }
 .rb-row-link::after { position: absolute; inset: 0; content: ''; }
 .rb-row-link:focus-visible { outline: none; }

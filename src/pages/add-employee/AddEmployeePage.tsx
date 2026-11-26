@@ -161,6 +161,7 @@ export default function AddEmployeePage() {
           name="email"
           type="email"
           inputMode="email"
+          spellCheck={false}
           value={email}
           onChange={(e) => {
             setEmail(e.target.value);

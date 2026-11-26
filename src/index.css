@@ -3,13 +3,64 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    /* Removes the double-tap zoom delay on phones; taps feel instant. */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
   html,
   body {
     @apply bg-canvas text-brand-ink font-sans antialiased;
+    /* Prices, counts and dates line up in columns and do not jump when they change. */
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Headings break into even lines instead of leaving one word on its own. */
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
   }
 
   /* Visible focus for keyboard users everywhere. */
   :focus-visible {
     @apply outline outline-2 outline-offset-2 outline-brand;
+  }
+
+  /* Scrolling inside a sheet or dialog does not scroll the page behind it. */
+  dialog {
+    overscroll-behavior: contain;
+  }
+
+  /* Dialogs and their backdrop fade in instead of appearing abruptly. Opacity only, so the
+     dialog is already in its final position on the first frame. */
+  dialog[open],
+  dialog[open]::backdrop {
+    animation: fade-in 160ms ease-out;
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  /* People who ask their system for less motion get none. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }

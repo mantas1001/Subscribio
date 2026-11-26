@@ -26,7 +26,7 @@ export default function PurchaseRecordedPage() {
             ['Status', subscription?.status === 'cancelled' ? 'Cancelled' : 'Active'],
             ['Added to spend', `${formatEur(subscription?.monthlyCostEur ?? request.monthlyCostEur)} / month`],
             ['New monthly total', formatEur(monthlySpend)],
-            ['Next renewal', subscription ? formatLongDate(subscription.renewalDate) : '—'],
+            ['Next renewal', subscription ? formatLongDate(subscription.renewalDate) : 'Not set'],
           ]}
         />
       </div>

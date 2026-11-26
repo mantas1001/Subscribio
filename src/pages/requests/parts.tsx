@@ -105,7 +105,7 @@ export function StatusIcon({ tone }: { tone: 'success' | 'declined' }) {
       aria-hidden="true"
       className="flex size-16 items-center justify-center rounded-full bg-danger-soft text-[22px] font-bold text-danger"
     >
-      –
+      −
     </span>
   );
 }

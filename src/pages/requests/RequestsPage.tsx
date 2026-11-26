@@ -40,7 +40,7 @@ export default function RequestsPage() {
               <li key={r.id}>
                 <Link
                   to={to}
-                  className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-4"
+                  className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-4 transition-[border-color,box-shadow] duration-150 hover:border-brand-accent hover:shadow-[0_2px_8px_rgba(31,58,46,0.06)]"
                 >
                   <span className="flex items-center gap-3">
                     <ToolTile tool={r.tool} />
