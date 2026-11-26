@@ -1,80 +1,37 @@
-import { useEffect, useRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useRef, type ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import { useStore } from '../../store';
 
-// Local building blocks for the request flow.
-// TODO(Role A): swap LocalButton / LocalBadge / LocalTopBar for Role C's
-// src/components/ui/{Button,Badge,TopBar} once they are on main.
+// Request-flow pieces that the shared kit (src/components/ui/, Role C) does not have.
+// Buttons, badges, top bar, cards, inputs and the empty state come from the shared kit.
 
-type Variant = 'primary' | 'secondary' | 'danger' | 'danger-outline';
+// Same look as the shared Button (src/components/ui/Button.tsx), but rendered as a link,
+// because these actions navigate. Ask Role C to add a link option to Button, then delete this.
+const linkButtonBase =
+  'inline-flex w-full min-h-[44px] items-center justify-center gap-2 rounded-md border px-4 py-3 text-base font-semibold leading-none transition-colors';
+const linkButtonVariants = {
+  primary: 'border-brand bg-brand text-surface hover:bg-brand-ink hover:border-brand-ink',
+  secondary: 'border-line bg-surface text-brand-ink hover:bg-brand-soft',
+} as const;
 
-const variantClass: Record<Variant, string> = {
-  primary: 'bg-brand text-surface border border-brand',
-  secondary: 'bg-surface text-brand-ink border border-line',
-  danger: 'bg-danger text-surface border border-danger',
-  'danger-outline': 'bg-surface text-danger border border-danger-line',
-};
-
-export function LocalButton({
-  variant = 'primary',
-  className = '',
-  ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant }) {
-  return (
-    <button
-      type="button"
-      {...props}
-      className={`flex w-full items-center justify-center rounded-lg px-4 py-3.5 text-base font-medium transition-opacity active:opacity-80 disabled:cursor-not-allowed disabled:opacity-60 ${variantClass[variant]} ${className}`}
-    />
-  );
-}
-
-export function LocalLinkButton({
+export function LinkButton({
   to,
   variant = 'primary',
   children,
 }: {
   to: string;
-  variant?: Variant;
+  variant?: keyof typeof linkButtonVariants;
   children: ReactNode;
 }) {
   return (
-    <Link
-      to={to}
-      className={`flex w-full items-center justify-center rounded-lg px-4 py-3.5 text-base font-medium ${variantClass[variant]}`}
-    >
+    <Link to={to} className={`${linkButtonBase} ${linkButtonVariants[variant]}`}>
       {children}
     </Link>
   );
 }
 
-export function LocalBadge({ tone, children }: { tone: 'pending' | 'approved'; children: ReactNode }) {
-  const toneClass =
-    tone === 'pending' ? 'bg-warn-bg text-warn-ink' : 'bg-brand-soft text-brand';
-  return (
-    <span className={`inline-flex rounded-sm px-2 py-0.5 text-caption font-medium ${toneClass}`}>
-      {children}
-    </span>
-  );
-}
-
-export function LocalTopBar({ title, backTo }: { title: string; backTo?: string }) {
-  const navigate = useNavigate();
-  return (
-    <header className="sticky top-0 z-10 border-b border-line bg-surface">
-      <div className="relative flex h-header items-center justify-center px-gutter">
-        <button
-          type="button"
-          onClick={() => (backTo ? navigate(backTo) : navigate(-1))}
-          className="absolute left-3 flex items-center gap-1 rounded-sm px-2 py-1 text-base text-brand-ink"
-        >
-          <span aria-hidden="true">‹</span> Back
-        </button>
-        <h1 className="text-base font-semibold text-brand-ink">{title}</h1>
-      </div>
-    </header>
-  );
-}
+/** Outlined red style for "Decline" (frame 2.2); the shared Button has only a filled danger variant. */
+export const declineButtonClass = 'w-full !border-danger-line !text-danger hover:!bg-danger-soft';
 
 /** Fixed bottom area with the screen's main actions (sits above the tab bar when shown). */
 export function ActionBar({ children, aboveTabBar = false }: { children: ReactNode; aboveTabBar?: boolean }) {
@@ -136,12 +93,22 @@ export function Sheet({
   );
 }
 
-export function ToolTile({ tool, size = 'md' }: { tool: string; size?: 'md' | 'lg' }) {
-  const box = size === 'lg' ? 'size-14 text-[22px] rounded-lg' : 'size-11 text-[17px] rounded-md';
+// Tool logo colours as in Figma: Ahrefs is orange (frames 1.1, 4.1), other tools light green (2.1).
+// Decorative only (aria-hidden): the tool name is always written next to it.
+const toolTileColour = (tool: string) =>
+  tool === 'Ahrefs' ? 'bg-tool-ahrefs text-surface' : 'bg-brand-soft text-brand';
+
+export function ToolTile({ tool, size = 'md' }: { tool: string; size?: 'sm' | 'md' | 'lg' }) {
+  const box =
+    size === 'lg'
+      ? 'size-14 text-[22px] rounded-lg'
+      : size === 'sm'
+        ? 'size-10 text-[17px] rounded-md'
+        : 'size-11 text-[17px] rounded-md';
   return (
     <span
       aria-hidden="true"
-      className={`flex shrink-0 items-center justify-center bg-brand-soft font-semibold text-brand ${box}`}
+      className={`flex shrink-0 items-center justify-center font-semibold ${toolTileColour(tool)} ${box}`}
     >
       {tool.charAt(0)}
     </span>
@@ -195,7 +162,7 @@ export function RequestNotFound() {
       <p className="text-body text-muted">
         This request no longer exists. It may have been removed when the example data was reset.
       </p>
-      <LocalLinkButton to="/requests">Back to requests</LocalLinkButton>
+      <LinkButton to="/requests">Back to requests</LinkButton>
     </div>
   );
 }

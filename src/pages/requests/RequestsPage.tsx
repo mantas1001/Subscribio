@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 import { formatEur, formatShortDate, useStore } from '../../store';
-import { ActionBar, LocalBadge, LocalLinkButton, StatusIcon, ToolTile, initials } from './parts';
+import Badge from '../../components/ui/Badge';
+import EmptyState from '../../components/ui/EmptyState';
+import { ActionBar, LinkButton, StatusIcon, ToolTile, initials } from './parts';
 
 // Frame 2.1 Pending requests, with frame 2.9 "Nothing pending" as the empty state.
 // Approved requests that still need a recorded purchase stay in the list so the CEO can
@@ -19,16 +21,13 @@ export default function RequestsPage() {
 
       {open.length === 0 ? (
         <>
-          <div className="flex flex-col items-center gap-3 rounded-xl border border-line bg-surface px-6 py-8 text-center">
-            <StatusIcon tone="success" />
-            <h2 className="text-section font-semibold text-brand-ink">You’re all caught up</h2>
-            <p className="text-small text-muted">
-              No requests are waiting for review. New ones appear here when a team member sends
-              one.
-            </p>
-          </div>
+          <EmptyState
+            icon={<StatusIcon tone="success" />}
+            title="You’re all caught up"
+            description="No requests are waiting for review. New ones appear here when a team member sends one."
+          />
           <ActionBar aboveTabBar>
-            <LocalLinkButton to="/">Back to overview</LocalLinkButton>
+            <LinkButton to="/">Back to overview</LinkButton>
           </ActionBar>
         </>
       ) : (
@@ -66,9 +65,9 @@ export default function RequestsPage() {
                       {r.requestedAt ? `Requested ${formatShortDate(r.requestedAt)}` : 'Requested'}
                     </span>
                     {r.status === 'pending' ? (
-                      <LocalBadge tone="pending">Pending review</LocalBadge>
+                      <Badge tone="warn">Pending review</Badge>
                     ) : (
-                      <LocalBadge tone="approved">Approved, record purchase</LocalBadge>
+                      <Badge tone="success">Approved, record purchase</Badge>
                     )}
                     <span aria-hidden="true" className="text-muted">
                       ›

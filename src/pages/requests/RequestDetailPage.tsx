@@ -1,15 +1,17 @@
 import { useRef, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { formatEur, formatEurShort, formatLongDate, useStore } from '../../store';
+import Badge from '../../components/ui/Badge';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import TopBar from '../../components/ui/TopBar';
 import {
   ActionBar,
   DetailTable,
-  LocalBadge,
-  LocalButton,
-  LocalTopBar,
   RequestNotFound,
   Sheet,
   ToolTile,
+  declineButtonClass,
   useRequest,
 } from './parts';
 import { useSaving } from './useSaving';
@@ -43,14 +45,14 @@ export default function RequestDetailPage() {
 
   return (
     <>
-      <LocalTopBar title="Request" backTo="/requests" />
+      <TopBar title="Request" onBack={() => navigate('/requests')} />
       <div className="flex flex-col gap-4 px-gutter pt-5">
         <p className="text-eyebrow font-medium uppercase text-brand-accent-text">Request review</p>
         <div className="flex items-center gap-3">
           <ToolTile tool={request.tool} size="lg" />
           <div className="flex flex-col items-start gap-1">
             <h2 className="text-[24px] font-semibold text-brand-ink">{request.tool}</h2>
-            <LocalBadge tone="pending">Pending review</LocalBadge>
+            <Badge tone="warn">Pending review</Badge>
           </div>
         </div>
 
@@ -68,10 +70,10 @@ export default function RequestDetailPage() {
         />
 
         {request.reason && (
-          <div className="flex flex-col gap-1 rounded-xl border border-line bg-surface px-4 py-3.5">
+          <Card className="flex flex-col gap-1">
             <p className="text-eyebrow font-medium uppercase text-brand-accent-text">Why they need it</p>
             <p className="text-base text-brand-ink">{request.reason}</p>
-          </div>
+          </Card>
         )}
 
         <div className="rounded-lg border border-line bg-brand-soft px-4 py-3.5">
@@ -83,10 +85,16 @@ export default function RequestDetailPage() {
 
       <ActionBar>
         <div className="flex gap-3">
-          <LocalButton variant="danger-outline" disabled={busy} onClick={() => setDeclineOpen(true)}>
+          <Button
+            variant="secondary"
+            className={declineButtonClass}
+            disabled={busy}
+            onClick={() => setDeclineOpen(true)}
+          >
             Decline
-          </LocalButton>
-          <LocalButton
+          </Button>
+          <Button
+            className="w-full"
             disabled={busy}
             aria-live="polite"
             onClick={() =>
@@ -97,7 +105,7 @@ export default function RequestDetailPage() {
             }
           >
             {approving.saving ? 'Approving…' : 'Approve'}
-          </LocalButton>
+          </Button>
         </div>
       </ActionBar>
 
@@ -118,8 +126,9 @@ export default function RequestDetailPage() {
           placeholder="For example: Let’s revisit next quarter."
           className="rounded-lg border border-line bg-surface px-3 py-3 text-base text-brand-ink placeholder:text-muted"
         />
-        <LocalButton
+        <Button
           variant="danger"
+          className="w-full"
           disabled={declining.saving}
           onClick={() =>
             declining.run(() => {
@@ -130,10 +139,10 @@ export default function RequestDetailPage() {
           }
         >
           {declining.saving ? 'Declining…' : 'Decline request'}
-        </LocalButton>
-        <LocalButton variant="secondary" onClick={() => setDeclineOpen(false)}>
+        </Button>
+        <Button variant="secondary" className="w-full" onClick={() => setDeclineOpen(false)}>
           Keep reviewing
-        </LocalButton>
+        </Button>
       </Sheet>
     </>
   );

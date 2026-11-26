@@ -1,15 +1,11 @@
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { REFERENCE_DATE, formatEur, useStore } from '../../store';
-import {
-  ActionBar,
-  LocalBadge,
-  LocalButton,
-  RequestNotFound,
-  Sheet,
-  ToolTile,
-  useRequest,
-} from './parts';
+import Badge from '../../components/ui/Badge';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import Input from '../../components/ui/Input';
+import { ActionBar, RequestNotFound, Sheet, ToolTile, useRequest } from './parts';
 import { useSaving } from './useSaving';
 
 // Frame 2.4 Ready to purchase, with frames 2.5 "Confirm purchase" and
@@ -58,7 +54,7 @@ export default function ReadyToPurchasePage() {
             Buy it with your company card first, then record the purchase here.
           </p>
         </div>
-        <div className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-4">
+        <Card className="flex flex-col gap-3">
           <div className="flex items-center gap-3">
             <ToolTile tool={request.tool} />
             <span className="flex flex-1 flex-col gap-0.5">
@@ -73,14 +69,16 @@ export default function ReadyToPurchasePage() {
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <LocalBadge tone="approved">Approved</LocalBadge>
+            <Badge tone="success">Approved</Badge>
             <span className="text-caption text-muted">Approved today</span>
           </div>
-        </div>
+        </Card>
       </div>
 
       <ActionBar aboveTabBar>
-        <LocalButton onClick={() => setSheetOpen(true)}>Record purchase</LocalButton>
+        <Button className="w-full" onClick={() => setSheetOpen(true)}>
+          Record purchase
+        </Button>
       </ActionBar>
 
       <Sheet
@@ -89,53 +87,40 @@ export default function ReadyToPurchasePage() {
         title="Record the purchase"
         description={`Confirm you bought ${request.tool} for ${employee?.name ?? 'your team member'}. It becomes active and counts toward monthly spend.`}
       >
-        <div className="flex gap-3">
-          <div className="flex flex-1 flex-col gap-1.5">
-            <label htmlFor="purchase-date" className="text-small font-medium text-brand-ink">
-              Purchase date
-            </label>
-            <input
+        <div className="flex items-start gap-3">
+          <div className="min-w-0 flex-1">
+            <Input
               id="purchase-date"
+              label="Purchase date"
               type="date"
-              required
               value={purchaseDate}
               onChange={(e) => setPurchaseDate(e.target.value)}
-              className="h-12 rounded-lg border border-line bg-surface px-3 text-base text-brand-ink"
+              className="w-full"
             />
           </div>
-          <div className="flex flex-1 flex-col gap-1.5">
-            <label htmlFor="amount-paid" className="text-small font-medium text-brand-ink">
-              Amount paid (€)
-            </label>
-            <input
+          <div className="min-w-0 flex-1">
+            {/* Frame 2.5a: empty amount shows the error under the field, on a light red fill. */}
+            <Input
               id="amount-paid"
+              label="Amount paid (€)"
               inputMode="decimal"
               placeholder="0.00"
               value={amount}
-              aria-invalid={error ? 'true' : 'false'}
-              aria-describedby={error ? 'amount-error' : undefined}
+              error={error ?? undefined}
               onChange={(e) => {
                 setAmount(e.target.value);
                 if (error) setError(null);
               }}
-              className={`h-12 rounded-lg border px-3 text-base text-brand-ink placeholder:text-muted ${
-                error ? 'border-danger bg-danger-soft' : 'border-line bg-surface'
-              }`}
+              className={`w-full ${error ? '!bg-danger-soft' : ''}`}
             />
-            {error && (
-              <p id="amount-error" role="alert" className="text-caption text-danger">
-                <span aria-hidden="true">⚠ </span>
-                {error}
-              </p>
-            )}
           </div>
         </div>
-        <LocalButton disabled={saving.saving} onClick={confirm}>
+        <Button className="w-full" disabled={saving.saving} onClick={confirm}>
           {saving.saving ? 'Saving…' : 'Confirm purchase'}
-        </LocalButton>
-        <LocalButton variant="secondary" onClick={() => setSheetOpen(false)}>
+        </Button>
+        <Button variant="secondary" className="w-full" onClick={() => setSheetOpen(false)}>
           Not yet
-        </LocalButton>
+        </Button>
       </Sheet>
     </>
   );
