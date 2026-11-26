@@ -5,6 +5,10 @@ for (const width of [1280, 1440]) {
     await page.setViewportSize({ width, height: 800 });
     await page.goto('/#/employees');
 
+    const sidebar = page.getByRole('complementary').getByRole('navigation', { name: 'Main' });
+    await expect(sidebar.getByRole('link', { name: 'Employees', exact: true })).toHaveAttribute('aria-current', 'page');
+    await expect(page.getByRole('navigation', { name: 'Main' })).toHaveCount(1);
+
     const list = page.getByRole('list', { name: 'Employees', exact: true });
     await expect(list).toBeVisible();
     expect((await list.boundingBox())?.width).toBeGreaterThan(800);
@@ -17,6 +21,9 @@ for (const width of [1280, 1440]) {
     expect(subscriptionPanel.x).toBeGreaterThan(monthlyCost.x + monthlyCost.width);
 
     await subscriptions.getByRole('link', { name: /Ahrefs/ }).click();
+    await expect(sidebar).toBeVisible();
+    await expect(page.getByText('Example data', { exact: true }).filter({ visible: true })).toHaveCount(1);
+    expect(await page.locator('html').evaluate(root => root.scrollWidth)).toBe(width);
     const cancel = page.getByRole('button', { name: 'Cancel subscription', exact: true });
     await cancel.click();
 
