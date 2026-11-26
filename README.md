@@ -71,12 +71,13 @@ owner.
 
 `src/components/ui/`, one file each, default-exported by name, importable from these paths:
 
-- `Button` — `variant="primary" | "secondary" | "danger"`, `disabled`, visible focus; `aria-pressed` for pressed, `aria-invalid` for error; default `type="button"`.
+- `Button` — `variant="primary" | "secondary" | "danger" | "danger-outline"`, `disabled`, visible focus; `aria-pressed` for pressed, `aria-invalid` for error; default `type="button"`.
+- `LinkButton` — same look as `Button` (`to`, `variant`), but a real link; use it for actions that only navigate.
 - `Card` — rounded, bordered, padded surface.
 - `ListRow` — optional `chevron`, `leading`/`trailing` slots; render inside `<ul>`.
 - `Input` — always-rendered `label`, optional `error`, `aria-invalid` + `aria-describedby`, `required`, `disabled`, forwarded `ref`.
 - `Badge` — `tone="default" | "brand" | "warn" | "danger" | "success"`.
-- `TopBar` — `title`, optional back button (`onBack`, `backLabel`), `trailing`.
+- `TopBar` — `title` (centred), optional back button (`onBack`, `backLabel`), `trailing`.
 - `BottomNav` — `items: { label, href, icon?, active?, count? }[]`, `ariaLabel`; mobile bottom bar.
 - `EmptyState` — `title`, `description`, `action`, `icon`.
 - `ErrorMessage` — `message`, `title`, `role="alert"`.
@@ -88,11 +89,18 @@ States covered: default, pressed, disabled, error, focus; `Input` default/error/
 
 ## Job 3 — Add employee (Role C)
 
-`/add-employee` (frames 5.1–5.3): labelled `Name`, `Email`, and an optional `Department`, client validation, clear and
-recoverable duplicate-email error via `addEmployee` (case-insensitive), `aria-busy` loading,
-success confirmation, and the new employee added to shared state so it appears in the Employees
-list. `+ Add employee` on the Employees screen is a secondary (outlined) button placed below
-the list (Role B). The form saves the department as the employee’s role.
+`/add-employee` (frames 5.1–5.3):
+- **5.1** "Add an employee" with `Full name`, `Work email` and an optional `Department`; one
+  "Add employee" action (bottom bar on phone, inline on desktop); client validation; `aria-busy`
+  "Adding…" state.
+- **5.2** duplicate email (case-insensitive, via `addEmployee`): banner "An employee with this email
+  already exists.", field message naming who uses it, and "Use a different email" / "See all team
+  members". Everything typed is kept.
+- **5.3** confirmation screen: "Employee added", the person's card with a "New" badge, "Back to
+  employees" / "Back to overview". The new employee appears in Employees and in the Overview count.
+
+`+ Add employee` on the Employees screen is a secondary (outlined) button placed below the list
+(Role B). The form saves the department as the employee's role.
 
 ## Browser regression test
 

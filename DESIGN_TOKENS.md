@@ -40,6 +40,10 @@ Warn:
 
 Danger:
 - `text-danger`, `border-danger`, `bg-danger`, `border-danger-line` decline/cancel/errors.
+- `bg-danger-soft` light red fill: field with an error (2.5a, 5.2), error banner, declined icon.
+
+Tools:
+- `bg-tool-ahrefs` orange Ahrefs logo tile (Figma 1.1, 4.1). Decorative only (`aria-hidden`), the tool name is always written next to it. Other tools use `bg-brand-soft` + `text-brand` (2.1).
 
 ### Accessibility
 
@@ -62,12 +66,13 @@ Danger:
 
 Shared in `src/components/ui/`, one file each, default-exported by name:
 
-- `Button.tsx`: `variant` `primary` | `secondary` | `danger`, `disabled`, `className`, `type`; states default, pressed (`aria-pressed`), disabled, error (`aria-invalid`), focus-visible.
+- `Button.tsx`: `variant` `primary` | `secondary` | `danger` | `danger-outline`, `disabled`, `className`, `type`; states default, pressed (`aria-pressed`), disabled, error (`aria-invalid`), focus-visible. Exports `buttonClasses()`.
+- `LinkButton.tsx`: `to`, `variant`, `className`; Button look on a router `Link`, for navigation-only actions.
 - `Card.tsx`: `children`, `className`.
 - `ListRow.tsx`: `children`, `leading`, `trailing`, `chevron`, `className`; renders `<li>`.
 - `Input.tsx`: `label`, `error`, `id`, `required`, `disabled`, `ref`, `className`, + input attributes; `aria-invalid`, `aria-describedby`, visible error; focus-visible.
 - `Badge.tsx`: `children`, `tone` `default` | `brand` | `warn` | `danger` | `success`, `className`.
-- `TopBar.tsx`: `title`, `onBack`, `backLabel`, `trailing`, `className`.
+- `TopBar.tsx`: `title` (centred, as in Figma 2.2 and 5.1), `onBack`, `backLabel`, `trailing`, `className`.
 - `BottomNav.tsx`: `items` `{ label, href, icon?, active?, count? }[]`, `ariaLabel`, `className`; mobile bottom bar; app shell uses desktop left sidebar on `lg`.
 - `EmptyState.tsx`: `title`, `description`, `action`, `icon`, `className`.
 - `ErrorMessage.tsx`: `message`, `title`, `className`, `role="alert"`.
@@ -81,7 +86,7 @@ Don't edit component files you don't own; ask the owner.
 - Loading: `aria-busy`, disabled controls, "…" label; no fake spinner requirements.
 - Empty: `EmptyState`.
 - Error: `ErrorMessage` / `Input error` / `Toast variant="error"`; recoverable; `role="alert"`.
-- Confirmation: `Toast variant="success"` / `role="status"`.
+- Confirmation: a confirmation screen with a success icon and `role="status"` (2.3, 2.6, 2.8, 4.3, 5.3); `Toast variant="success"` for small inline confirmations.
 - Pressed/disabled/focus on `Button`; invalid on `Input`.
 - Example data labelled "Example data"; visible "Reset example data".
 
