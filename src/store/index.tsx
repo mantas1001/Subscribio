@@ -12,15 +12,23 @@ import { exampleData, REFERENCE_DATE, type AppState } from './exampleData';
 import { reducer } from './reducer';
 import { daysBetween } from './format';
 
-export { REFERENCE_DATE } from './exampleData';
+export { REFERENCE_DATE, DEPARTMENT_OPTIONS } from './exampleData';
 export type { AppState } from './exampleData';
 export * from './format';
 
 const STORAGE_KEY = 'subscribio-state-v1';
 
+export type AddEmployeeInput = {
+  name: string;
+  email: string;
+  /** Department, e.g. "Engineering" (frame 5.1). Optional, so `{ name, email }` still works. */
+  role?: string;
+};
+
 export type AddEmployeeResult =
   | { ok: true; employee: Employee }
-  | { ok: false; error: string };
+  /** `existing` is set for a duplicate email, so the form can say who already uses it (frame 5.2). */
+  | { ok: false; error: string; existing?: Employee };
 
 export type Store = AppState & {
   // actions
@@ -29,7 +37,7 @@ export type Store = AppState & {
   /** Optional details from the "Record the purchase" sheet; defaults to the requested cost. */
   recordPurchase: (id: string, details?: { amountEur?: number; purchaseDate?: string }) => void;
   cancelSubscription: (id: string) => void;
-  addEmployee: (input: { name: string; email: string }) => AddEmployeeResult;
+  addEmployee: (input: AddEmployeeInput) => AddEmployeeResult;
   resetExampleData: () => void;
   // derived values (always computed from state, never hard-coded)
   monthlySpend: number;
@@ -70,20 +78,28 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [state]);
 
   const addEmployee = useCallback(
-    ({ name, email }: { name: string; email: string }): AddEmployeeResult => {
+    ({ name, email, role }: AddEmployeeInput): AddEmployeeResult => {
       const cleanName = name.trim();
       const cleanEmail = email.trim();
+      const cleanRole = role?.trim() || undefined;
       if (!cleanName) return { ok: false, error: 'Enter a name.' };
       if (!cleanEmail) return { ok: false, error: 'Enter an email address.' };
-      const taken = state.employees.some(
+      const existing = state.employees.find(
         (e) => e.email.toLowerCase() === cleanEmail.toLowerCase(),
       );
-      if (taken) {
-        return { ok: false, error: 'Someone on your team already uses this email.' };
+      if (existing) {
+        return { ok: false, error: 'Someone on your team already uses this email.', existing };
       }
       const id = `emp-${Date.now().toString(36)}`;
-      dispatch({ type: 'addEmployee', id, name: cleanName, email: cleanEmail });
-      return { ok: true, employee: { id, name: cleanName, email: cleanEmail, subscriptionIds: [] } };
+      dispatch({ type: 'addEmployee', id, name: cleanName, email: cleanEmail, role: cleanRole });
+      const employee: Employee = {
+        id,
+        name: cleanName,
+        email: cleanEmail,
+        ...(cleanRole ? { role: cleanRole } : {}),
+        subscriptionIds: [],
+      };
+      return { ok: true, employee };
     },
     [state.employees],
   );
