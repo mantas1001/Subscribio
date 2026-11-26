@@ -33,15 +33,18 @@ export function LinkButton({
 /** Outlined red style for "Decline" (frame 2.2); the shared Button has only a filled danger variant. */
 export const declineButtonClass = 'w-full !border-danger-line !text-danger hover:!bg-danger-soft';
 
-/** Fixed bottom area with the screen's main actions (sits above the tab bar when shown). */
+/**
+ * The screen's main actions. Phone: fixed to the bottom (above the tab bar when shown).
+ * Desktop: an inline row of buttons under the content, aligned left.
+ */
 export function ActionBar({ children, aboveTabBar = false }: { children: ReactNode; aboveTabBar?: boolean }) {
   return (
     <>
-      <div aria-hidden="true" className="h-36" />
+      <div aria-hidden="true" className="h-36 lg:hidden" />
       <div
         className={`fixed left-1/2 z-10 flex w-full max-w-app -translate-x-1/2 flex-col gap-3 border-t border-line bg-surface px-3 py-3 ${
           aboveTabBar ? 'bottom-tabbar' : 'bottom-0'
-        }`}
+        } lg:static lg:mt-6 lg:max-w-2xl lg:translate-x-0 lg:flex-row lg:border-0 lg:bg-transparent lg:px-gutter lg:py-0 lg:[&>*]:w-auto lg:[&>*]:min-w-[200px]`}
       >
         {children}
       </div>
@@ -79,10 +82,11 @@ export function Sheet({
         if (e.target === ref.current) onClose();
       }}
       aria-labelledby="sheet-title"
-      className="fixed inset-x-0 bottom-0 top-auto m-0 mx-auto w-full max-w-app rounded-t-[20px] bg-surface p-0 text-brand-ink backdrop:bg-brand-ink/40"
+      // Phone: bottom sheet. Desktop: centred dialog.
+      className="fixed inset-x-0 bottom-0 top-auto m-0 mx-auto w-full max-w-app rounded-t-[20px] bg-surface p-0 text-brand-ink backdrop:bg-brand-ink/40 lg:inset-0 lg:m-auto lg:h-fit lg:max-w-md lg:rounded-[20px]"
     >
-      <div className="flex flex-col gap-3 px-gutter pb-5 pt-3">
-        <span aria-hidden="true" className="mx-auto h-1 w-9 rounded-full bg-line" />
+      <div className="flex flex-col gap-3 px-gutter pb-5 pt-3 lg:px-6 lg:pb-6 lg:pt-6">
+        <span aria-hidden="true" className="mx-auto h-1 w-9 rounded-full bg-line lg:hidden" />
         <h2 id="sheet-title" className="text-[20px] font-semibold">
           {title}
         </h2>
@@ -157,7 +161,7 @@ export function useRequest(requestId: string | undefined) {
 
 export function RequestNotFound() {
   return (
-    <div className="flex flex-col gap-4 px-gutter pt-6">
+    <div className="flex flex-col gap-4 px-gutter pt-6 lg:max-w-2xl">
       <h1 className="text-title font-semibold">Request not found</h1>
       <p className="text-body text-muted">
         This request no longer exists. It may have been removed when the example data was reset.

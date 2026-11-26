@@ -56,7 +56,11 @@ export default {
         tabbar: '58px',
       },
       maxWidth: {
-        app: '440px',
+        app: '440px', // phone layout column (below lg)
+        desktop: '1100px', // desktop content width (issue #10)
+      },
+      width: {
+        sidebar: '240px', // desktop navigation
       },
     },
   },

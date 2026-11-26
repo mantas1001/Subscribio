@@ -46,7 +46,7 @@ export default function RequestDetailPage() {
   return (
     <>
       <TopBar title="Request" onBack={() => navigate('/requests')} />
-      <div className="flex flex-col gap-4 px-gutter pt-5">
+      <div className="flex flex-col gap-4 px-gutter pt-5 lg:max-w-2xl">
         <p className="text-eyebrow font-medium uppercase text-brand-accent-text">Request review</p>
         <div className="flex items-center gap-3">
           <ToolTile tool={request.tool} size="lg" />
@@ -84,7 +84,7 @@ export default function RequestDetailPage() {
       </div>
 
       <ActionBar>
-        <div className="flex gap-3">
+        <div className="flex gap-3 lg:[&>*]:min-w-[160px]">
           <Button
             variant="secondary"
             className={declineButtonClass}

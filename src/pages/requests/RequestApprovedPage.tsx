@@ -14,7 +14,7 @@ export default function RequestApprovedPage() {
 
   return (
     <>
-      <div className="flex flex-col gap-4 px-gutter pt-6" role="status">
+      <div className="flex flex-col gap-4 px-gutter pt-6 lg:max-w-2xl" role="status">
         <StatusIcon tone="success" />
         <h1 className="text-title font-semibold text-brand-ink">Request approved</h1>
         <p className="text-body text-muted">
