@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useStore } from '../../store';
+import { DEPARTMENT_OPTIONS, useStore } from '../../store';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Input from '../../components/ui/Input';
@@ -21,6 +21,7 @@ export default function AddEmployeePage() {
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [department, setDepartment] = useState('');
   const [nameError, setNameError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -65,7 +66,7 @@ export default function AddEmployeePage() {
     try {
       // Let the loading state render; no backend call.
       await Promise.resolve();
-      const result = addEmployee({ name: cleanName, email: cleanEmail });
+      const result = addEmployee({ name: cleanName, email: cleanEmail, role: department || undefined });
 
       if (!result.ok) {
         // Recoverable: keep input, surface error, allow retry after editing.
@@ -79,6 +80,7 @@ export default function AddEmployeePage() {
       setAdded(result.employee);
       setName('');
       setEmail('');
+      setDepartment('');
     } finally {
       setSubmitting(false);
     }
@@ -106,7 +108,7 @@ export default function AddEmployeePage() {
             <Toast
               variant="success"
               title="Employee added"
-              message={`${added.name} (${added.email}) has been added. They are now in your employee list.`}
+              message={added.role ? `${added.name} joined ${added.role}.` : `${added.name} has been added to your employee list.`}
               onDismiss={() => setAdded(null)}
             />
             <Card>
@@ -118,6 +120,9 @@ export default function AddEmployeePage() {
               <div className="mt-3 flex flex-wrap gap-2">
                 <Button variant="secondary" onClick={() => navigate('/employees')}>
                   Back to employees
+                </Button>
+                <Button variant="secondary" onClick={() => navigate('/')}>
+                  Back to overview
                 </Button>
               </div>
             </Card>
@@ -162,6 +167,21 @@ export default function AddEmployeePage() {
               placeholder="name@example.com"
               inputMode="email"
             />
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="employee-department" className="text-small font-medium text-brand-ink">
+                Department
+              </label>
+              <select
+                id="employee-department"
+                value={department}
+                onChange={(event) => setDepartment(event.target.value)}
+                disabled={submitting}
+                className="min-h-[44px] rounded-md border border-line bg-surface px-3 py-2.5 text-base text-brand-ink disabled:opacity-50"
+              >
+                <option value="">Select a department</option>
+                {DEPARTMENT_OPTIONS.map((option) => <option key={option}>{option}</option>)}
+              </select>
+            </div>
           </Card>
 
           <Button
@@ -187,6 +207,7 @@ export default function AddEmployeePage() {
               clearMessages();
               setName('');
               setEmail('');
+              setDepartment('');
             }}
             className="self-center rounded-sm px-2 py-1 text-caption text-muted underline underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             disabled={submitting}
