@@ -17,7 +17,7 @@ export default function EmployeesPage({ employees, subscriptions, loading, error
       ) : employees.length === 0 ? (
         <EmptyState title="No employees yet" description="Add an employee to start tracking their tools." />
       ) : (
-        <Card className="rb-list" role="group" aria-label="Employees">
+        <Card className="rb-list rb-employee-list" role="group" aria-label="Employees">
           {employees.map(employee => {
             const tools = activeTools(employee, subscriptions);
             return (

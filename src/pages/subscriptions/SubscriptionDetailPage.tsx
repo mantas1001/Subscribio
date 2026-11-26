@@ -43,7 +43,7 @@ export default function SubscriptionDetailPage({ subscriptionId, employees, subs
       <p className="rb-eyebrow">{renewalLabel(subscription.renewalDate)}</p>
       <div className="rb-subscription-heading">
         <ToolLogo tool={toolName(subscription)} large />
-        <div><h1 className="rb-subscription-name">{subscription.tool}</h1><Badge>Active</Badge></div>
+        <div><h1 className="rb-subscription-name">{subscription.tool}{subscription.plan && ` · ${subscription.plan}`}</h1><Badge>Active</Badge></div>
       </div>
       <Details rows={[
         ['Owner', ownerNames || 'No employee assigned'],

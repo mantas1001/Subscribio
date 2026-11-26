@@ -1,5 +1,4 @@
-/* Layout styles owned by Role B. The shared Tailwind theme supplies these tokens.
-   work/role-b-preview/tailwind.config.cjs is a preview-only reference mapping. */
+/* Layout styles owned by Role B. The shared Tailwind theme supplies the color and typography tokens. */
 .rb-shell { max-width: 440px; margin: 0 auto; min-height: 100svh; color: theme(colors.brand.ink); background: theme(colors.canvas); font-family: theme(fontFamily.sans); --rb-footer-height: 58px; }
 .rb-shell--actions-tabs { --rb-footer-height: 198px; }
 .rb-shell--actions { --rb-footer-height: 139px; }
@@ -14,6 +13,7 @@
 .rb-shell--actions-tabs .rb-footer { bottom: theme(spacing.tabbar); }
 .rb-footer { position: fixed; z-index: 20; width: min(100%, 440px); bottom: 0; padding-bottom: env(safe-area-inset-bottom); background: theme(colors.surface); }
 .rb-actions { display: flex; flex-direction: column; gap: 10px; padding: 12px 16px; border-top: 1px solid theme(colors.line); }
+.rb-employee-list > a { min-height: 73px; }
 .rb-list > a:focus-visible { outline-offset: -3px; }
 .rb-list-copy { display: flex; flex: 1 1 0; min-width: 0; flex-direction: column; gap: 2px; }
 .rb-row-title { font-size: 16px; line-height: 19px; font-weight: 500; overflow-wrap: anywhere; }
@@ -36,7 +36,7 @@
 .rb-metric--primary { color: theme(colors.surface); background: theme(colors.brand.DEFAULT) !important; border-color: theme(colors.brand.DEFAULT) !important; }
 .rb-metric--primary .rb-metric-label, .rb-metric--primary .rb-metric-footnote, .rb-metric--primary .rb-metric-amount span { color: theme(colors.brand.on-dark); }
 .rb-tool-logo { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 40px; height: 40px; border: 1px solid theme(colors.line); border-radius: 10px; font-size: 17px; line-height: 21px; font-weight: 600; background: theme(colors.brand.DEFAULT); color: theme(colors.surface); }
-.rb-tool-logo[data-tool="Ahrefs"] { background: theme(colors.brand.ink); color: theme(colors.surface); }
+.rb-tool-logo[data-tool="Ahrefs"] { background: theme(colors.tool-ahrefs); color: theme(colors.surface); }
 .rb-tool-logo--large { width: 56px; height: 56px; border-radius: 15px; font-size: 24px; line-height: 29px; }
 .rb-eyebrow { color: theme(colors.brand.accent-text); font-size: 12px; line-height: 15px; font-weight: 500; letter-spacing: 1.6px; text-transform: uppercase; }
 .rb-subscription-heading { display: flex; align-items: center; gap: 14px; }
@@ -51,6 +51,7 @@
 .rb-note { padding: 14px 16px; border: 1px solid theme(colors.line); border-radius: 12px; font-size: 15px; line-height: 18px; font-weight: 500; color: theme(colors.brand.DEFAULT); background: theme(colors.brand.soft); }
 .rb-note--warning { color: theme(colors.warn.ink); background: theme(colors.warn.bg); border-color: theme(colors.warn.line); }
 .rb-danger-outline { background: theme(colors.surface) !important; color: theme(colors.danger.DEFAULT) !important; border: 1px solid theme(colors.danger.line) !important; }
+.rb-result > .rb-muted { max-width: 385px; }
 .rb-result { display: flex; flex-direction: column; gap: 18px; }
 .rb-success-mark { display: flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 50%; font-size: 30px; line-height: 36px; font-weight: 700; background: theme(colors.brand.soft); color: theme(colors.brand.DEFAULT); }
 .rb-cancel-dialog { position: fixed; top: auto; bottom: 0; inset-inline: 0; margin: 0 auto; width: min(100%, 440px); max-width: 440px; max-height: calc(100svh - 16px); overflow-y: auto; border: 0; border-radius: 22px 22px 0 0; padding: 22px 20px calc(28px + env(safe-area-inset-bottom)); background: theme(colors.surface); color: theme(colors.brand.ink); font-family: theme(fontFamily.sans); }

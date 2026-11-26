@@ -18,6 +18,7 @@ export const exampleData: AppState = {
     {
       id: 'sub-ahrefs',
       tool: 'Ahrefs',
+      plan: 'Standard',
       seats: 1,
       monthlyCostEur: 99,
       renewalDate: '2026-11-21',

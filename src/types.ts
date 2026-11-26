@@ -4,6 +4,7 @@
 export type Subscription = {
   id: string;
   tool: string;
+  plan?: string;
   seats: number;
   monthlyCostEur: number;
   renewalDate: string; // ISO date
