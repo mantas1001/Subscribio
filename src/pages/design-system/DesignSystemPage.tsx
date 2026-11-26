@@ -48,7 +48,9 @@ const spacing = [
   ['h-tabbar', '58px', 'Bottom nav height'],
   ['gap-3 / p-3', '12px', 'Common spacing'],
   ['gap-4 / p-4', '16px', 'Common spacing'],
-  ['max-w-app', '440px', 'App column width'],
+  ['max-w-app', '440px', 'Phone layout column'],
+  ['max-w-desktop', '1100px', 'Desktop content width'],
+  ['w-sidebar', '240px', 'Desktop navigation'],
 ] as const;
 
 const radius = [
@@ -72,9 +74,9 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 export default function DesignSystemPage() {
   return (
-    <div className="flex flex-col gap-8 pb-24">
-      <TopBar title="Design system" backLabel="Back" />
-      <div className="flex flex-col gap-8 px-gutter pt-4">
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 pb-24">
+      <TopBar title="Design system" backLabel="Back" className="px-gutter lg:px-0" />
+      <div className="flex flex-col gap-8 px-gutter pt-4 lg:px-0">
         <header className="flex flex-col gap-1">
           <p className="text-eyebrow font-medium uppercase text-brand-accent-text">Role C</p>
           <h1 className="text-title font-semibold text-brand-ink">Subscribio design system</h1>
@@ -98,7 +100,7 @@ export default function DesignSystemPage() {
         </Section>
 
         <Section title="Colours">
-          <div className="grid grid-cols-1 gap-2">
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
             {colours.map(([name, cls, use]) => (
               <Card key={name} className="flex items-center gap-3 p-3">
                 <span aria-hidden="true" className={`size-9 shrink-0 rounded-md border border-line ${cls}`} />

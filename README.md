@@ -31,7 +31,8 @@ npm run preview  # preview the production build
 ```
 
 The app uses `HashRouter` and a relative base path, so `dist/` works on any static host with no
-server rewrites. It is mobile-first; on a wide screen it sits in a centred 440 px wide column.
+server rewrites. **Desktop target:** computer web page first (1280–1440 px); on `lg` a left sidebar
+and up to 1100 px content. Mobile (<1024 px) keeps 440 px phone layout/bottom bar.
 
 ## Stack and rules
 
@@ -48,7 +49,8 @@ server rewrites. It is mobile-first; on a wide screen it sits in a centred 440 p
 - Design tokens (colours, type scale, spacing, radius) live in `tailwind.config.js`. Never
   hard-code colours in pages/components. See `DESIGN_TOKENS.md`.
 - Accessibility basics: text contrast ≥ 4.5:1, labelled inputs, visible focus, colour never
-  the only carrier of meaning. Mobile-first; check screens at 440 px width.
+  the only carrier of meaning. Desktop-first; check screens at 1280 and 1440 px width; phone at
+  440 px still works.
 
 ## Project layout
 
@@ -78,7 +80,7 @@ owner.
 - `Input` — always-rendered `label`, optional `error`, `aria-invalid` + `aria-describedby`, `required`, `disabled`, forwarded `ref`.
 - `Badge` — `tone="default" | "brand" | "warn" | "danger" | "success"`.
 - `TopBar` — `title`, optional back button (`onBack`, `backLabel`), `trailing`.
-- `BottomNav` — `items: { label, href, icon?, active?, count? }[]`, `ariaLabel`.
+- `BottomNav` — `items: { label, href, icon?, active?, count? }[]`, `ariaLabel`; mobile bottom bar.
 - `EmptyState` — `title`, `description`, `action`, `icon`.
 - `ErrorMessage` — `message`, `title`, `role="alert"`.
 - `Toast` — `message`, `title`, `variant="default" | "success" | "error"`, `onDismiss`, `aria-live`.

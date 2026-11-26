@@ -21,7 +21,7 @@ export default function ListRow({
 }: ListRowProps) {
   return (
     <li
-      className={`flex list-none items-center gap-3 border-b border-line px-4 py-3.5 last:border-b-0 ${className}`.trim()}
+      className={`flex list-none items-center gap-3 border-b border-line px-4 py-3.5 last:border-b-0 lg:px-4 lg:py-4 ${className}`.trim()}
       {...rest}
     >
       {leading}
