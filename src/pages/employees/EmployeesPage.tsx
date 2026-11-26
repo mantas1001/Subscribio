@@ -41,7 +41,7 @@ export default function EmployeesPage({ employees, subscriptions, loading, error
           </ul>
         </Card>
       )}
-      <Button variant="secondary" className="rb-full-width" onClick={() => navigate('/add-employee')}>
+      <Button variant="secondary" className="rb-full-width rb-add-employee" onClick={() => navigate('/add-employee')}>
         <span aria-hidden="true">+&nbsp; </span>Add employee
       </Button>
     </RoleBLayout>
