@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { authCallback, authMode, RETURN_TO_KEY, supabase } from './supabase';
+import { forgetGoogleAccount } from './googleIdentity';
 
 export type AuthStatus = 'loading' | 'signed-in' | 'signed-out' | 'disabled' | 'misconfigured';
 
@@ -9,9 +10,14 @@ type AuthContextValue = {
   user: User | null;
   /** Message to show on the sign-in screen (cancelled, failed), or null. */
   error: string | null;
-  /** True from the click on "Continue with Google" until the browser leaves for Google. */
+  /**
+   * True from the click on "Continue with Google" until the browser leaves for Google (with
+   * Google's button: while the ID token is swapped for a session).
+   */
   redirecting: boolean;
   signInWithGoogle: () => Promise<void>;
+  /** Google's button (Google Identity Services): swap Google's ID token for a Supabase session. */
+  signInWithGoogleIdToken: (idToken: string, nonce: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -116,8 +122,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const signInWithGoogleIdToken = useCallback(async (idToken: string, nonce: string) => {
+    if (!supabase) return;
+    setError(null);
+    setRedirecting(true);
+    const { error: signInError } = await supabase.auth.signInWithIdToken({
+      provider: 'google',
+      token: idToken,
+      nonce,
+    });
+    setRedirecting(false);
+    if (signInError) {
+      console.warn('Sign-in error:', signInError.message);
+      setError('Google sign-in didn’t work. Please try again.');
+    }
+  }, []);
+
   const signOut = useCallback(async () => {
     if (!supabase) return;
+    forgetGoogleAccount();
     // 'local': sign out on this browser only, not on the user's other devices.
     const { error: signOutError } = await supabase.auth.signOut({ scope: 'local' });
     if (signOutError) console.warn('Sign-out error:', signOutError.message);
@@ -138,8 +161,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             : session
               ? 'signed-in'
               : 'signed-out';
-    return { status, user: session?.user ?? null, error, redirecting, signInWithGoogle, signOut };
-  }, [ready, session, error, redirecting, signInWithGoogle, signOut]);
+    return {
+      status,
+      user: session?.user ?? null,
+      error,
+      redirecting,
+      signInWithGoogle,
+      signInWithGoogleIdToken,
+      signOut,
+    };
+  }, [ready, session, error, redirecting, signInWithGoogle, signInWithGoogleIdToken, signOut]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
