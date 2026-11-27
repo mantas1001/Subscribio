@@ -171,8 +171,10 @@ async function fakeSupabase(page: Page, outcome: 'success' | 'cancel', options: 
 }
 
 test.beforeEach(async ({ page }) => {
-  // These tests are about sign-in and data; keep the analytics banner out of the way.
-  await page.addInitScript(() => localStorage.setItem('subscribio:analytics-consent', 'denied'));
+  // Clarity starts on every visit in this build; answer its script locally (no network).
+  await page.route('https://www.clarity.ms/**', (route) =>
+    route.fulfill({ status: 200, contentType: 'text/javascript', body: '' }),
+  );
   await page.goto('/');
   await page.evaluate(() => {
     localStorage.clear();
@@ -314,12 +316,7 @@ test.describe('shared workspace', () => {
   });
 });
 
-test('with analytics allowed, Clarity is linked to the member by user ID and role only', async ({ page }) => {
-  // Runs after the beforeEach init script, so this visitor has allowed analytics.
-  await page.addInitScript(() => localStorage.setItem('subscribio:analytics-consent', 'granted'));
-  await page.route('https://www.clarity.ms/**', (route) =>
-    route.fulfill({ status: 200, contentType: 'text/javascript', body: '' }),
-  );
+test('Clarity is linked to the member by user ID and role only', async ({ page }) => {
   await fakeSupabase(page, 'success');
   await page.goto('/#/');
   await page.getByRole('button', { name: 'Continue with Google' }).click();
