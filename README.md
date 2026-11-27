@@ -153,9 +153,10 @@ your Supabase project ref (the part before `.supabase.co`).
 1. Create (or pick) a Google Cloud project.
 2. Google Auth Platform → **Branding**: app name `Subscribio`, a support email and a developer
    contact email. Under authorized domains add `supabase.co`.
-3. **Audience**: user type *External*. Leave publishing status on *Testing* and add every Google
-   account that should be able to sign in under **Test users** (up to 100). Other accounts get
-   "access blocked" until you publish the app.
+3. **Audience**: user type *External*, publishing status *Testing*. Add your own accounts under
+   **Test users**. Note: because the app only asks for name, email and profile picture (no
+   sensitive scopes), Google does **not** enforce the test-user list, so **any Google account can
+   sign in**. Sign-in does not restrict who can use Subscribio; app data stays in each browser.
 4. **Data access**: the default `openid`, `.../auth/userinfo.email` and
    `.../auth/userinfo.profile` scopes are all that is needed (no verification required).
 5. **Clients** → Create client → *Web application*:
@@ -194,7 +195,6 @@ Copy `.env.example` to `.env.local`, fill in the two values and run `npm run dev
 - Sign out: back to the sign-in screen; a reload keeps you signed out.
 - Continue with Google, then press Cancel / close Google's account chooser with "Back": you see
   "Sign-in was cancelled" (or the button is ready again) and stay signed out.
-- Try an account that is not a test user: Google blocks it (expected while in *Testing*).
 
 ## Git workflow
 
