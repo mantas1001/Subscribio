@@ -1,10 +1,14 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import { initClarity } from './analytics/clarity';
 // Inter, the typeface used in the Figma file, self-hosted (font-display: swap, only the
 // character sets a page actually uses are downloaded).
 import '@fontsource-variable/inter';
 import './index.css';
+
+// Loads Microsoft Clarity only if the visitor allowed it on an earlier visit.
+initClarity();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

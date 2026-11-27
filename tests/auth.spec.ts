@@ -171,6 +171,8 @@ async function fakeSupabase(page: Page, outcome: 'success' | 'cancel', options: 
 }
 
 test.beforeEach(async ({ page }) => {
+  // These tests are about sign-in and data; keep the analytics banner out of the way.
+  await page.addInitScript(() => localStorage.setItem('subscribio:analytics-consent', 'denied'));
   await page.goto('/');
   await page.evaluate(() => {
     localStorage.clear();
@@ -310,4 +312,20 @@ test.describe('shared workspace', () => {
     await page.getByRole('button', { name: 'Sign out' }).click();
     await expect(page.getByRole('heading', { name: 'Sign in to Subscribio' })).toBeVisible();
   });
+});
+
+test('with analytics allowed, Clarity is linked to the member by user ID and role only', async ({ page }) => {
+  // Runs after the beforeEach init script, so this visitor has allowed analytics.
+  await page.addInitScript(() => localStorage.setItem('subscribio:analytics-consent', 'granted'));
+  await page.route('https://www.clarity.ms/**', (route) =>
+    route.fulfill({ status: 200, contentType: 'text/javascript', body: '' }),
+  );
+  await fakeSupabase(page, 'success');
+  await page.goto('/#/');
+  await page.getByRole('button', { name: 'Continue with Google' }).click();
+  await expect(page).toHaveTitle('Overview · Subscribio');
+  const calls = await page.evaluate(() => window.clarity?.q ?? []);
+  expect(calls).toContainEqual(['identify', user.id]);
+  expect(calls).toContainEqual(['set', 'role', 'admin']);
+  expect(JSON.stringify(calls)).not.toContain(user.email);
 });

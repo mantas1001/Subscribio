@@ -226,6 +226,23 @@ How it is built (`supabase/migrations/0001_shared_workspace.sql`, run once in Su
 - The app listens for new `activity` rows (Supabase Realtime) and reloads, so other people's changes
   appear without refreshing.
 
+## Analytics (Microsoft Clarity)
+
+Heatmaps and session recordings with [Microsoft Clarity](https://clarity.microsoft.com) (free),
+project **Subscribio** (ID `zk7es1fao8`). Code: `src/analytics/`.
+
+- **Consent first:** a "Help improve Subscribio?" banner asks every visitor. Clarity's script is not
+  loaded until they click **Allow**; **No thanks** loads nothing. The choice is saved in the browser;
+  **Analytics settings** (bottom of the Overview) asks again. Turning it off reloads the page.
+- **Linked to members, pseudonymously:** signed-in visits send Clarity the Supabase user ID
+  (`identify` + tag `user_id`) and the tag `role` (admin/member). No name or email is sent. The user
+  ID of each member is shown on **Team access**; filter by it in Clarity to find their sessions.
+- Clarity masks typed text by default; keep masking on (Clarity → Settings → Masking).
+- Config: `VITE_CLARITY_PROJECT_ID` (Vercel env var, Production + Preview). Without it, or in the
+  `e2e` test build, nothing related to Clarity is shown or loaded.
+- `tests/clarity.spec.ts` checks the banner, that nothing loads before consent, and that **Allow**
+  loads the tag; `tests/auth.spec.ts` checks the identify call contains no email.
+
 ## Git workflow
 
 Branches are named `a/<task>`, `b/<task>`, `c/<task>`. Never commit directly to `main` (except
@@ -238,6 +255,6 @@ and fix that first.
 ## Credits
 
 - Figma prototype: Subscribio, `https://www.figma.com/design/MUCNmwo5em7ccPfXSGJ6Rt/Untitled`.
-- Libraries: React, React DOM, React Router, Supabase JS (Google sign-in), Vite, TypeScript, Tailwind CSS, PostCSS, Autoprefixer.
+- Libraries: React, React DOM, React Router, Supabase JS (Google sign-in), Microsoft Clarity (analytics, with consent), Vite, TypeScript, Tailwind CSS, PostCSS, Autoprefixer.
 - AI assistance used during development.
 - All names, emails and prices are invented example data; no real people's data.
