@@ -226,6 +226,35 @@ How it is built (`supabase/migrations/0001_shared_workspace.sql`, run once in Su
 - The app listens for new `activity` rows (Supabase Realtime) and reloads, so other people's changes
   appear without refreshing.
 
+## Analytics: Microsoft Clarity
+
+Optional heatmaps and session recordings with [Microsoft Clarity](https://clarity.microsoft.com)
+(free). Code: `src/analytics/clarity.ts` and `src/components/layout/ConsentBanner.tsx`.
+
+**How it behaves**
+- Off unless `VITE_CLARITY_ID` is set. With no ID there is no banner and no script, so local
+  development and the browser tests (`--mode e2e`, `auth-test`) never load it.
+- With an ID, signed-in visitors see a small consent banner. **Nothing loads until they click
+  "Allow analytics"** (EU rules: Clarity sets cookies and records sessions). "Decline" is just as
+  easy, and "Privacy settings" (sidebar on desktop, Overview on phones) reopens the choice.
+  Withdrawing tells Clarity to stop and clear its cookies.
+- After consent the app sends Clarity's consent signal (`consentv2`, analytics allowed, ads denied)
+  and tags every screen (`screen` = "Overview", "Requests"…) so recordings can be filtered by screen.
+
+**Set it up**
+1. Go to <https://clarity.microsoft.com>, sign in, **New project**: name `Subscribio`, website URL =
+   your Vercel production URL.
+2. Choose **Install manually**, then copy the **Project ID** (the code after `/tag/` in the snippet,
+   also under Settings → Overview). Do not paste the snippet into the code; the app loads it itself.
+3. Vercel → project → **Settings → Environment Variables**: add `VITE_CLARITY_ID` = your ID for
+   **Production** and **Preview**, then **Redeploy** (Vite reads the value at build time).
+4. Open the live site, click **Allow analytics**, click around. Clarity shows data within about
+   30 minutes to 2 hours.
+5. Optional, recommended: in Clarity → Settings → **Masking**, keep **Balanced** or choose **Strict**
+   so typed text (names, emails) is hidden in recordings.
+
+For local testing put `VITE_CLARITY_ID=yourid` in `.env.local` (git-ignored) and run `npm run dev`.
+
 ## Git workflow
 
 Branches are named `a/<task>`, `b/<task>`, `c/<task>`. Never commit directly to `main` (except

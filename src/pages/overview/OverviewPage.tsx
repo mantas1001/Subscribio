@@ -18,6 +18,7 @@ import { Sheet, ToolTile } from '../requests/parts';
 import Button from '../../components/ui/Button';
 import LinkButton from '../../components/ui/LinkButton';
 import PageHeader from '../../components/layout/PageHeader';
+import { PrivacySettingsLink } from '../../components/layout/ConsentBanner';
 
 // Overview (Figma 1.1, with 1.2 after a purchase and 1.3 after a cancel). Every number is
 // derived live from the shared store. Premium layout: page header with actions, an alert strip
@@ -298,6 +299,9 @@ export default function OverviewPage() {
           Add employee
         </LinkButton>
       </div>
+
+      {/* Phone has no sidebar: the privacy choice can be changed here too. */}
+      <PrivacySettingsLink className="self-center lg:hidden" />
 
       {/* Shared workspace: only admins may wipe everyone's data. */}
       {!isEmpty && store.isAdmin && (
