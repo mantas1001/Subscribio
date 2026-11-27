@@ -16,15 +16,6 @@ export type Member = {
   last_seen: string;
 };
 
-export type ActivityEntry = {
-  id: number;
-  at: string;
-  actor_id: string | null;
-  actor_name: string | null;
-  action: string;
-  summary: string;
-};
-
 /** Error from Supabase, with a message a person can read. */
 export class RemoteError extends Error {}
 
@@ -132,13 +123,4 @@ export async function callAction(client: SupabaseClient, fn: string, args?: Reco
   if (error) throw toRemoteError(error);
 }
 
-export async function fetchActivity(client: SupabaseClient, limit = 200): Promise<ActivityEntry[]> {
-  const { data, error } = await client
-    .from('activity')
-    .select('id,at,actor_id,actor_name,action,summary')
-    .order('at', { ascending: false })
-    .limit(limit);
-  if (error) throw toRemoteError(error);
-  return (data ?? []) as ActivityEntry[];
-}
 

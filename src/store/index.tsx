@@ -93,8 +93,6 @@ export type Store = AppState & {
   isAdmin: boolean;
   /** The signed-in member (shared mode), else null. */
   member: Member | null;
-  /** Goes up by one whenever anyone changes the shared workspace (the Activity page listens). */
-  activityVersion: number;
   // actions
   approveRequest: (id: string) => void;
   declineRequest: (id: string) => void;
@@ -151,7 +149,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [attempt, setAttempt] = useState(0);
   const [member, setMember] = useState<Member | null>(null);
   const [syncError, setSyncError] = useState<string | null>(null);
-  const [activityVersion, setActivityVersion] = useState(0);
   const isAdmin = !shared || (member?.role === 'admin' && !member.blocked);
 
   // Local mode: keep the workspace in this browser.
@@ -208,7 +205,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       window.clearTimeout(timer);
       timer = window.setTimeout(() => {
         refresh().catch((error) => console.warn('Workspace refresh failed:', error));
-        setActivityVersion((v) => v + 1);
       }, 250);
     };
     const channel = client
@@ -310,7 +306,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       mode: shared ? 'shared' : 'local',
       isAdmin,
       member,
-      activityVersion,
       approveRequest: (id) => {
         dispatch({ type: 'approveRequest', id });
         sync('approve_request', { p_id: id });
@@ -361,7 +356,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       employeeCount: state.employees.length,
       departmentCount: departments.size,
     };
-  }, [state, addEmployee, addSubscription, sync, shared, isAdmin, member, activityVersion]);
+  }, [state, addEmployee, addSubscription, sync, shared, isAdmin, member]);
 
   if (phase !== 'ready') {
     return <WorkspaceStatus phase={phase} onRetry={() => setAttempt((n) => n + 1)} />;
