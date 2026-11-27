@@ -14,7 +14,8 @@ Frames are named like `1.1 Overview`; clickable layers are named `link:KEY|label
 destination frame name starts with `KEY`. Frame names and numbers win over prose.
 
 All names, emails and prices in the app are invented example data. The app shows a small
-"Example data" label and a visible "Reset example data" action. No backend, no login.
+"Example data" label and a visible "Reset example data" action. Users sign in with Google
+(Supabase Auth, see [Google sign-in](#google-sign-in)); there is no other backend.
 
 ## Run it
 
@@ -34,7 +35,8 @@ and up to 1100 px content. Mobile (<1024 px) keeps 440 px phone layout/bottom ba
 ## Stack and rules
 
 - Vite + React + TypeScript + Tailwind CSS. React Router with `HashRouter`.
-- No backend, no login. State lives in a React context with `useReducer`, saved to
+- Google sign-in through Supabase Auth is the only backend piece (`src/auth/`). App data is not
+  stored in Supabase: state lives in a React context with `useReducer`, saved to
   `localStorage`. `useStore()` returns state plus `approveRequest`, `declineRequest`,
   `recordPurchase`, `cancelSubscription`, `addEmployee({ name, email, role? })` (duplicate email error,
   case-insensitive), `resetExampleData`, and derived values `monthlySpend`, `annualizedSpend`
@@ -42,7 +44,8 @@ and up to 1100 px content. Mobile (<1024 px) keeps 440 px phone layout/bottom ba
   `renewalsWithin30Days`, computed live and never hard-coded.
 - Currency is euro (€) everywhere. English text only. No "Lorem ipsum". No real people's data.
 - No fake claims: no AI features, no integrations, no bank connection. Only what the Figma
-  frames show. No features, screens, backend or login that aren't in the frames.
+  frames show. No features, screens or backend that aren't in the frames (the Google sign-in
+  screen is the one agreed exception).
 - Design tokens (colours, type scale, spacing, radius) live in `tailwind.config.js`. Never
   hard-code colours in pages/components. See `DESIGN_TOKENS.md`.
 - Accessibility basics: text contrast ≥ 4.5:1, labelled inputs, visible focus, colour never
@@ -105,8 +108,93 @@ States covered: default, pressed, disabled, error, focus; `Input` default/error/
 ## Browser regression test
 
 Run `npx playwright install chromium` once, then run `npm run test:e2e`.
-The suite builds the production app, checks core workflows in Chromium, and runs automated
+The suite builds the app with sign-in switched off (`vite build --mode e2e`), checks core workflows
+in Chromium, and runs automated
 accessibility scans at phone and desktop widths.
+
+`tests/auth.spec.ts` runs against a second build (`dist-auth/`, port 4175) with sign-in switched on
+and a fake Supabase project answered inside the test, so it checks signing in, cancelling, signing
+out and returning to the page you opened without a real Google account.
+
+## Google sign-in
+
+The whole app sits behind "Continue with Google". Code: `src/auth/` (Supabase client,
+`AuthProvider`, `AuthGate`, `SignInPage`) and `src/components/layout/Account.tsx` (signed-in
+account and "Sign out" in the sidebar and phone header).
+
+How it behaves:
+
+- Signed-out visitors see only the sign-in screen, at the address they opened. After signing in
+  they land on that page (e.g. a shared `#/employees/e2` link).
+- Cancelling at Google brings you back with "Sign-in was cancelled" and you stay signed out.
+- "Sign out" signs out this browser only and returns to the sign-in screen.
+- The PKCE flow is used because of `HashRouter`: Supabase returns `?code=…` in the query string, so
+  it never collides with `#/routes`.
+- Sign-in mode per build: Supabase keys set → sign-in required. `npm run dev` without keys or the
+  `e2e` test build → no sign-in. A production build without keys → "Sign-in isn't set up yet" screen
+  (fails closed, the app never opens without sign-in by accident).
+- App data still lives in `localStorage` per browser, not per account.
+
+### One-time setup
+
+You need the published address, here `https://subscribio.vercel.app`. Replace `<ref>` below with
+your Supabase project ref (the part before `.supabase.co`).
+
+**1. Supabase project**
+
+1. Create a project at [supabase.com](https://supabase.com) (the free plan is enough).
+2. Project Settings → API Keys (or API): copy the **Project URL** and the **publishable key**
+   (`sb_publishable_…`; the legacy `anon` key also works). Never use the `service_role` / secret key.
+3. Authentication → Sign In / Providers → Google: copy the **Callback URL (for OAuth)**. It looks
+   like `https://<ref>.supabase.co/auth/v1/callback`. Leave this page open.
+
+**2. Google OAuth client** ([Google Cloud Console](https://console.cloud.google.com))
+
+1. Create (or pick) a Google Cloud project.
+2. Google Auth Platform → **Branding**: app name `Subscribio`, a support email and a developer
+   contact email. Under authorized domains add `supabase.co`.
+3. **Audience**: user type *External*. Leave publishing status on *Testing* and add every Google
+   account that should be able to sign in under **Test users** (up to 100). Other accounts get
+   "access blocked" until you publish the app.
+4. **Data access**: the default `openid`, `.../auth/userinfo.email` and
+   `.../auth/userinfo.profile` scopes are all that is needed (no verification required).
+5. **Clients** → Create client → *Web application*:
+   - Authorized JavaScript origins: `https://subscribio.vercel.app` and `http://localhost:5173`
+   - Authorized redirect URIs: `https://<ref>.supabase.co/auth/v1/callback` (from step 1.3)
+6. Copy the **Client ID** and **Client secret**.
+
+**3. Turn on Google in Supabase**
+
+1. Authentication → Sign In / Providers → Google: enable it, paste the Client ID and Client
+   secret, save.
+2. Authentication → URL Configuration:
+   - **Site URL**: `https://subscribio.vercel.app/`
+   - **Redirect URLs**: `https://subscribio.vercel.app/` and `http://localhost:5173/`. For Vercel
+     preview deployments also add a pattern such as `https://subscribio-*.vercel.app/`.
+   The app always returns to its base address (origin + path, with a trailing `/`), so these must
+   match exactly.
+
+**4. Vercel**
+
+1. Project → Settings → Environment Variables: add `VITE_SUPABASE_URL` and
+   `VITE_SUPABASE_PUBLISHABLE_KEY` for Production (and Preview).
+2. Redeploy. Vite bakes these values in at build time, so an old deployment keeps showing
+   "Sign-in isn't set up yet" until it is rebuilt.
+
+**5. Local development**
+
+Copy `.env.example` to `.env.local`, fill in the two values and run `npm run dev`
+(`.env.local` is git-ignored).
+
+### Test it on the published site
+
+- Open `https://subscribio.vercel.app/#/employees` in a private window: you see the sign-in screen.
+- Continue with Google with a test user: you land on Employees, with your name in the sidebar.
+- Reload: still signed in.
+- Sign out: back to the sign-in screen; a reload keeps you signed out.
+- Continue with Google, then press Cancel / close Google's account chooser with "Back": you see
+  "Sign-in was cancelled" (or the button is ready again) and stay signed out.
+- Try an account that is not a test user: Google blocks it (expected while in *Testing*).
 
 ## Git workflow
 
@@ -120,6 +208,6 @@ and fix that first.
 ## Credits
 
 - Figma prototype: Subscribio, `https://www.figma.com/design/MUCNmwo5em7ccPfXSGJ6Rt/Untitled`.
-- Libraries: React, React DOM, React Router, Vite, TypeScript, Tailwind CSS, PostCSS, Autoprefixer.
+- Libraries: React, React DOM, React Router, Supabase JS (Google sign-in), Vite, TypeScript, Tailwind CSS, PostCSS, Autoprefixer.
 - AI assistance used during development.
 - All names, emails and prices are invented example data; no real people's data.

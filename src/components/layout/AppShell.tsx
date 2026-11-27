@@ -2,6 +2,7 @@ import { useEffect, type ReactNode } from 'react';
 import { NavLink, Outlet, useLocation, matchPath } from 'react-router-dom';
 import { ClipboardText, SquaresFour, UsersThree, type Icon } from '@phosphor-icons/react';
 import { useStore } from '../../store';
+import { HeaderAccount, SidebarAccount } from './Account';
 
 // App frame.
 // Desktop (lg, 1024 px and wider) is the main target (issue #10): a left sidebar with the
@@ -125,16 +126,19 @@ function Sidebar() {
           />
         </ul>
       </nav>
-      {hasExampleData && (
-        <div className="mt-auto rounded-lg border border-line bg-canvas p-3">
-          <span className="inline-flex rounded-xs border border-warn-line bg-warn-bg px-2 py-0.5 text-label font-medium text-warn-ink">
-            Example data
-          </span>
-          <p className="mt-2 text-caption text-muted">
-            Sample company data so you can try every flow. Reset everything to zero from the Overview.
-          </p>
-        </div>
-      )}
+      <div className="mt-auto flex flex-col gap-3">
+        {hasExampleData && (
+          <div className="rounded-lg border border-line bg-canvas p-3">
+            <span className="inline-flex rounded-xs border border-warn-line bg-warn-bg px-2 py-0.5 text-label font-medium text-warn-ink">
+              Example data
+            </span>
+            <p className="mt-2 text-caption text-muted">
+              Sample company data so you can try every flow. Reset everything to zero from the Overview.
+            </p>
+          </div>
+        )}
+        <SidebarAccount />
+      </div>
     </aside>
   );
 }
@@ -187,7 +191,7 @@ function LogoMark() {
   );
 }
 
-function Logo() {
+export function Logo() {
   return (
     <span className="flex items-center gap-2">
       <LogoMark />
@@ -198,7 +202,7 @@ function Logo() {
   );
 }
 
-/** Phone header (below lg): logo and the example-data label. */
+/** Phone header (below lg): logo, the example-data label and "Sign out". */
 export function Header() {
   const { hasExampleData } = useStore();
   return (
@@ -211,6 +215,7 @@ export function Header() {
             Example data
           </span>
         )}
+        <HeaderAccount />
       </div>
     </header>
   );
