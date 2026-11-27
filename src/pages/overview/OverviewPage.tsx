@@ -18,7 +18,6 @@ import { Sheet, ToolTile } from '../requests/parts';
 import Button from '../../components/ui/Button';
 import LinkButton from '../../components/ui/LinkButton';
 import PageHeader from '../../components/layout/PageHeader';
-import { clarityAvailable, resetConsent } from '../../analytics/clarity';
 
 // Overview (Figma 1.1, with 1.2 after a purchase and 1.3 after a cancel). Every number is
 // derived live from the shared store. Premium layout: page header with actions, an alert strip
@@ -308,16 +307,6 @@ export default function OverviewPage() {
           className="self-center rounded-sm px-2 py-1 text-caption text-muted underline underline-offset-2 transition-[color] duration-150 hover:text-brand-ink lg:self-start"
         >
           Reset example data
-        </button>
-      )}
-
-      {clarityAvailable && (
-        <button
-          type="button"
-          onClick={resetConsent}
-          className="self-center rounded-sm px-2 py-1 text-caption text-muted underline underline-offset-2 transition-[color] duration-150 hover:text-brand-ink lg:self-start"
-        >
-          Analytics settings
         </button>
       )}
 

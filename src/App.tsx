@@ -2,7 +2,6 @@ import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { StoreProvider } from './store';
 import { AuthProvider } from './auth/AuthProvider';
 import AuthGate from './auth/AuthGate';
-import ConsentBanner from './analytics/ConsentBanner';
 import AppShell from './components/layout/AppShell';
 import OverviewPage from './pages/overview/OverviewPage';
 import { EmployeesRoute, EmployeeDetailRoute, SubscriptionRoute } from './pages/employees/RoleBRoutes';
@@ -72,7 +71,6 @@ export default function App() {
           </HashRouter>
         </StoreProvider>
       </AuthGate>
-      <ConsentBanner />
     </AuthProvider>
   );
 }

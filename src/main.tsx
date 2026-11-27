@@ -7,7 +7,7 @@ import { initClarity } from './analytics/clarity';
 import '@fontsource-variable/inter';
 import './index.css';
 
-// Loads Microsoft Clarity only if the visitor allowed it on an earlier visit.
+// Starts Microsoft Clarity (when a project ID is configured).
 initClarity();
 
 createRoot(document.getElementById('root')!).render(
