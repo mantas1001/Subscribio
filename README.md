@@ -16,7 +16,7 @@ destination frame name starts with `KEY`. Frame names and numbers win over prose
 All names, emails and prices in the app are invented example data. The app shows a small
 "Example data" label and a visible "Reset example data" action. Users sign in with Google
 (Supabase Auth, see [Google sign-in](#google-sign-in)) and share one workspace stored in Supabase,
-with an activity log (see [Shared workspace](#shared-workspace-and-activity-log)).
+with every change recorded in the database (see [Shared workspace](#shared-workspace-and-activity-log)).
 
 ## Run it
 
@@ -223,10 +223,9 @@ Copy `.env.example` to `.env.local`, fill in the two values and run `npm run dev
 Everyone who signs in works in **one shared workspace** stored in Supabase, and every change is
 recorded in an **activity log**.
 
-- **Activity** page (`/activity`, all members): who did what and when, newest first, updating live.
-- Members see **names only** in the app: the activity log never loads or shows anyone's email
-  (the database refuses to hand out `activity.actor_email`, see `0002_hide_emails.sql`). There is
-  no in-app member list; manage members in Supabase → Table Editor → `members`
+- The log is **not shown in the app** (the Activity page was removed). It stays in the database:
+  Supabase → Table Editor → `activity`. Members can't read `activity.actor_email`
+  (see `0002_hide_emails.sql`). There is no in-app member list; manage members in Supabase → Table Editor → `members`
   (`role` = `admin`/`member`, `blocked` = `true` removes access).
 - Only admins can **Reset to zero** or **Load example data**, because that wipes everyone's data.
 - If someone else changed the same thing first (e.g. two people approve one request), the change is

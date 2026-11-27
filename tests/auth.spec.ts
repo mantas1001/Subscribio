@@ -116,7 +116,7 @@ function fakeDb(options: FakeOptions) {
 
 async function fakeSupabase(page: Page, outcome: 'success' | 'cancel', options: FakeOptions = {}) {
   const db = fakeDb(options);
-  const calls = { authorize: [] as URL[], token: 0, logout: 0, rpc: [] as { fn: string; args: Record<string, unknown> }[], selects: [] as string[], db };
+  const calls = { authorize: [] as URL[], token: 0, logout: 0, rpc: [] as { fn: string; args: Record<string, unknown> }[], db };
   await page.route(`${SUPABASE}/**`, async (route) => {
     const url = new URL(route.request().url());
     if (url.pathname === '/auth/v1/authorize') {
@@ -158,7 +158,6 @@ async function fakeSupabase(page: Page, outcome: 'success' | 'cancel', options: 
       return route.fulfill({ status: 204, body: '' });
     }
     const table = url.pathname.match(/^\/rest\/v1\/(\w+)$/)?.[1];
-    if (table) calls.selects.push(`${table}?${url.searchParams.get('select') ?? ''}`);
     if (table && table in db) return json(db[table as 'employees']);
     return route.fulfill({ status: 404, body: '' });
   });
@@ -253,18 +252,12 @@ test.describe('shared workspace', () => {
     expect(calls.rpc.map((c) => c.fn)).toContain('join_workspace');
   });
 
-  test('approving a request saves it and shows up in the activity log', async ({ page }) => {
+  test('approving a request saves it in Supabase', async ({ page }) => {
     const calls = await signIn(page, {}, '/#/requests/req-chatgpt');
     await page.getByRole('button', { name: /^Approve/ }).click();
     await expect(page.getByRole('heading', { name: 'Request approved' })).toBeVisible();
     await expect.poll(() => calls.rpc.find((c) => c.fn === 'approve_request')?.args).toEqual({ p_id: 'req-chatgpt' });
 
-    await page.goto('/#/activity');
-    await expect(page.getByRole('heading', { name: 'Activity', level: 1 })).toBeVisible();
-    await expect(page.getByText('approved the ChatGPT Team request from Drew Cooper')).toBeVisible();
-    // Names only: the log never loads or shows anyone's email.
-    expect(calls.selects.filter((q) => q.startsWith('activity?')).join()).not.toContain('email');
-    await expect(page.getByRole('main')).not.toContainText('@');
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
     expect(results.violations).toEqual([]);
   });
@@ -279,23 +272,25 @@ test.describe('shared workspace', () => {
     await expect(page.getByText('ChatGPT Team').first()).toBeVisible();
   });
 
-  test('members can see Activity but not the reset action', async ({ page }) => {
+  test('members don\u2019t see the reset action', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await signIn(page, { role: 'member' });
-    const sidebar = page.locator('aside');
-    await expect(sidebar.getByRole('link', { name: 'Activity' })).toBeVisible();
+    await expect(page.locator('aside').getByRole('link', { name: 'Requests' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Reset example data' })).toHaveCount(0);
   });
 
-  test('there is no Team access page (it listed everyone’s email)', async ({ page }) => {
+  test('there are no Team access or Activity pages', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await signIn(page);
-    await expect(page.locator('aside').getByRole('link', { name: 'Activity' })).toBeVisible();
-    await expect(page.locator('aside').getByRole('link', { name: 'Team access' })).toHaveCount(0);
+    const sidebar = page.locator('aside');
+    await expect(sidebar.getByRole('link', { name: 'Requests' })).toBeVisible();
+    await expect(sidebar.getByRole('link', { name: 'Team access' })).toHaveCount(0);
+    await expect(sidebar.getByRole('link', { name: 'Activity' })).toHaveCount(0);
     await page.goto('/#/team-access');
     await expect(page).toHaveURL(/#\/$/);
     await page.goto('/#/activity');
-    await expect(page.getByRole('link', { name: 'Team access' })).toHaveCount(0);
+    await expect(page).toHaveURL(/#\/$/);
+    await expect(page.getByRole('heading', { name: 'Activity' })).toHaveCount(0);
   });
 
   test('blocked members see "You don\u2019t have access"', async ({ page }) => {
