@@ -91,9 +91,11 @@ export default function OverviewPage() {
               <UserPlus size={18} aria-hidden="true" />
               Add your first employee
             </LinkButton>
-            <Button variant="secondary" className="w-full sm:w-auto" onClick={() => store.loadExampleData()}>
-              Load example data
-            </Button>
+            {store.isAdmin && (
+              <Button variant="secondary" className="w-full sm:w-auto" onClick={() => store.loadExampleData()}>
+                Load example data
+              </Button>
+            )}
           </div>
         </div>
       )}
@@ -297,7 +299,8 @@ export default function OverviewPage() {
         </LinkButton>
       </div>
 
-      {!isEmpty && (
+      {/* Shared workspace: only admins may wipe everyone's data. */}
+      {!isEmpty && store.isAdmin && (
         <button
           type="button"
           onClick={() => setResetOpen(true)}
@@ -312,7 +315,11 @@ export default function OverviewPage() {
         open={resetOpen}
         onClose={() => setResetOpen(false)}
         title="Reset all data to zero?"
-        description="All employees, subscriptions and requests are removed, and every total goes back to 0. This cannot be undone."
+        description={
+          store.mode === 'shared'
+            ? 'All employees, subscriptions and requests are removed for everyone in this workspace, and every total goes back to 0. This cannot be undone.'
+            : 'All employees, subscriptions and requests are removed, and every total goes back to 0. This cannot be undone.'
+        }
       >
         <Button
           variant="danger"

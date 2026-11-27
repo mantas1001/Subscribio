@@ -5,12 +5,17 @@ import {
   useEffect,
   useMemo,
   useReducer,
+  useState,
   type ReactNode,
 } from 'react';
 import type { Employee, Subscription } from '../types';
 import { exampleData, REFERENCE_DATE, type AppState } from './exampleData';
 import { reducer } from './reducer';
-import { daysBetween } from './format';
+import { addMonths, daysBetween } from './format';
+import { supabase } from '../auth/supabase';
+import { callAction, fetchWorkspace, joinWorkspace, RemoteError, type Member } from './remote';
+import WorkspaceStatus from '../components/layout/WorkspaceStatus';
+import Toast from '../components/ui/Toast';
 
 export { REFERENCE_DATE, DEPARTMENT_OPTIONS } from './exampleData';
 export type { AppState } from './exampleData';
@@ -75,7 +80,21 @@ export function validateSubscription(
   return errors;
 }
 
+/**
+ * Where the data lives:
+ * - `shared`: one workspace in Supabase for everyone who signs in, with an activity log.
+ * - `local`: this browser's localStorage only (tests, and local dev without Supabase keys).
+ */
+export type WorkspaceMode = 'local' | 'shared';
+
 export type Store = AppState & {
+  mode: WorkspaceMode;
+  /** May reset or clear the workspace and manage team access. Always true in local mode. */
+  isAdmin: boolean;
+  /** The signed-in member (shared mode), else null. */
+  member: Member | null;
+  /** Goes up by one whenever anyone changes the shared workspace (the Activity page listens). */
+  activityVersion: number;
   // actions
   approveRequest: (id: string) => void;
   declineRequest: (id: string) => void;
@@ -119,16 +138,105 @@ function loadState(): AppState {
   return structuredClone(exampleData);
 }
 
-export function StoreProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, undefined, loadState);
+const EMPTY_STATE: AppState = { subscriptions: [], employees: [], requests: [] };
 
+type Phase = 'loading' | 'ready' | 'error' | 'blocked';
+
+export function StoreProvider({ children }: { children: ReactNode }) {
+  const shared = supabase !== null;
+  const [state, dispatch] = useReducer(reducer, undefined, () =>
+    shared ? EMPTY_STATE : loadState(),
+  );
+  const [phase, setPhase] = useState<Phase>(shared ? 'loading' : 'ready');
+  const [attempt, setAttempt] = useState(0);
+  const [member, setMember] = useState<Member | null>(null);
+  const [syncError, setSyncError] = useState<string | null>(null);
+  const [activityVersion, setActivityVersion] = useState(0);
+  const isAdmin = !shared || (member?.role === 'admin' && !member.blocked);
+
+  // Local mode: keep the workspace in this browser.
   useEffect(() => {
+    if (shared) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch {
       // storage full or blocked: the app still works for this visit
     }
-  }, [state]);
+  }, [state, shared]);
+
+  const refresh = useCallback(async () => {
+    if (!supabase) return;
+    dispatch({ type: 'replace', state: await fetchWorkspace(supabase) });
+  }, []);
+
+  // Shared mode: join the workspace (the first visit makes you a member), then load it.
+  useEffect(() => {
+    if (!supabase) return;
+    const client = supabase;
+    let active = true;
+    setPhase('loading');
+    (async () => {
+      try {
+        const me = await joinWorkspace(client);
+        if (!active) return;
+        setMember(me);
+        if (me.blocked) {
+          setPhase('blocked');
+          return;
+        }
+        const next = await fetchWorkspace(client);
+        if (!active) return;
+        dispatch({ type: 'replace', state: next });
+        setPhase('ready');
+      } catch (error) {
+        console.warn('Workspace load failed:', error);
+        if (active) setPhase('error');
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [attempt]);
+
+  // Shared mode: when anyone changes something (a new activity row), reload. Also reload when
+  // the tab comes back into view, in case the live connection dropped.
+  useEffect(() => {
+    if (!supabase || phase !== 'ready') return;
+    const client = supabase;
+    let timer: number | undefined;
+    const reload = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        refresh().catch((error) => console.warn('Workspace refresh failed:', error));
+        setActivityVersion((v) => v + 1);
+      }, 250);
+    };
+    const channel = client
+      .channel('workspace-activity')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'activity' }, reload)
+      .subscribe();
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') reload();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.clearTimeout(timer);
+      document.removeEventListener('visibilitychange', onVisible);
+      void client.removeChannel(channel);
+    };
+  }, [phase, refresh]);
+
+  /** Shared mode: send a change that is already on screen. If it fails, say so and reload. */
+  const sync = useCallback(
+    (fn: string, args?: Record<string, unknown>) => {
+      if (!supabase) return;
+      callAction(supabase, fn, args).catch((error) => {
+        setSyncError(error instanceof RemoteError ? error.message : 'Couldn’t save that change.');
+        refresh().catch(() => {});
+      });
+    },
+    [refresh],
+  );
 
   const addEmployee = useCallback(
     ({ name, email, role }: AddEmployeeInput): AddEmployeeResult => {
@@ -145,6 +253,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
       const id = `emp-${Date.now().toString(36)}`;
       dispatch({ type: 'addEmployee', id, name: cleanName, email: cleanEmail, role: cleanRole });
+      sync('add_employee', { p_id: id, p_name: cleanName, p_email: cleanEmail, p_role: cleanRole ?? null });
       const employee: Employee = {
         id,
         name: cleanName,
@@ -154,7 +263,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       };
       return { ok: true, employee };
     },
-    [state.employees],
+    [state.employees, sync],
   );
 
   const addSubscription = useCallback(
@@ -172,9 +281,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         status: 'active',
       };
       dispatch({ type: 'addSubscription', subscription, employeeId: input.employeeId });
+      sync('add_subscription', {
+        p_id: subscription.id,
+        p_tool: subscription.tool,
+        p_plan: plan || null,
+        p_seats: subscription.seats,
+        p_monthly_cost_eur: subscription.monthlyCostEur,
+        p_renewal_date: subscription.renewalDate,
+        p_employee_id: input.employeeId,
+      });
       return { ok: true, subscription };
     },
-    [state.employees],
+    [state.employees, sync],
   );
 
   const value = useMemo<Store>(() => {
@@ -182,17 +300,48 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const pending = state.requests.filter((r) => r.status === 'pending');
     const monthlySpend = active.reduce((sum, s) => sum + s.monthlyCostEur, 0);
     const departments = new Set(state.employees.map((e) => e.role).filter(Boolean));
+    const loadExample = () => {
+      if (!isAdmin) return;
+      dispatch({ type: 'reset' });
+      sync('load_example_data');
+    };
     return {
       ...state,
-      approveRequest: (id) => dispatch({ type: 'approveRequest', id }),
-      declineRequest: (id) => dispatch({ type: 'declineRequest', id }),
-      recordPurchase: (id, details) => dispatch({ type: 'recordPurchase', id, ...details }),
-      cancelSubscription: (id) => dispatch({ type: 'cancelSubscription', id }),
+      mode: shared ? 'shared' : 'local',
+      isAdmin,
+      member,
+      activityVersion,
+      approveRequest: (id) => {
+        dispatch({ type: 'approveRequest', id });
+        sync('approve_request', { p_id: id });
+      },
+      declineRequest: (id) => {
+        dispatch({ type: 'declineRequest', id });
+        sync('decline_request', { p_id: id });
+      },
+      recordPurchase: (id, details) => {
+        const request = state.requests.find((r) => r.id === id);
+        if (!request || request.status !== 'approved') return;
+        dispatch({ type: 'recordPurchase', id, ...details });
+        sync('record_purchase', {
+          p_id: id,
+          p_amount_eur: details?.amountEur ?? null,
+          p_renewal_date: addMonths(details?.purchaseDate ?? REFERENCE_DATE, 1),
+        });
+      },
+      cancelSubscription: (id) => {
+        dispatch({ type: 'cancelSubscription', id });
+        sync('cancel_subscription', { p_id: id });
+      },
       addEmployee,
       addSubscription,
-      resetExampleData: () => dispatch({ type: 'reset' }),
-      loadExampleData: () => dispatch({ type: 'reset' }),
-      clearAllData: () => dispatch({ type: 'clear' }),
+      resetExampleData: loadExample,
+      loadExampleData: loadExample,
+      clearAllData: () => {
+        if (!isAdmin) return;
+        dispatch({ type: 'clear' });
+        sync('clear_all_data');
+      },
       hasExampleData:
         state.employees.some((e) => EXAMPLE_IDS.has(e.id)) ||
         state.subscriptions.some((s) => EXAMPLE_IDS.has(s.id)) ||
@@ -212,9 +361,28 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       employeeCount: state.employees.length,
       departmentCount: departments.size,
     };
-  }, [state, addEmployee, addSubscription]);
+  }, [state, addEmployee, addSubscription, sync, shared, isAdmin, member, activityVersion]);
 
-  return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
+  if (phase !== 'ready') {
+    return <WorkspaceStatus phase={phase} onRetry={() => setAttempt((n) => n + 1)} />;
+  }
+
+  return (
+    <StoreContext.Provider value={value}>
+      {children}
+      {syncError && (
+        <div className="fixed inset-x-0 bottom-[calc(theme(spacing.tabbar)+16px)] z-30 mx-auto w-full max-w-app px-gutter lg:bottom-6 lg:left-auto lg:right-6 lg:mx-0 lg:max-w-sm lg:px-0">
+          <Toast
+            variant="error"
+            title="Not saved"
+            message={`${syncError} The page now shows the latest saved data.`}
+            onDismiss={() => setSyncError(null)}
+            className="shadow-overlay"
+          />
+        </div>
+      )}
+    </StoreContext.Provider>
+  );
 }
 
 export function useStore(): Store {

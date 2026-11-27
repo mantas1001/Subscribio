@@ -15,7 +15,8 @@ destination frame name starts with `KEY`. Frame names and numbers win over prose
 
 All names, emails and prices in the app are invented example data. The app shows a small
 "Example data" label and a visible "Reset example data" action. Users sign in with Google
-(Supabase Auth, see [Google sign-in](#google-sign-in)); there is no other backend.
+(Supabase Auth, see [Google sign-in](#google-sign-in)) and share one workspace stored in Supabase,
+with an activity log (see [Shared workspace](#shared-workspace-and-activity-log)).
 
 ## Run it
 
@@ -35,9 +36,10 @@ and up to 1100 px content. Mobile (<1024 px) keeps 440 px phone layout/bottom ba
 ## Stack and rules
 
 - Vite + React + TypeScript + Tailwind CSS. React Router with `HashRouter`.
-- Google sign-in through Supabase Auth is the only backend piece (`src/auth/`). App data is not
-  stored in Supabase: state lives in a React context with `useReducer`, saved to
-  `localStorage`. `useStore()` returns state plus `approveRequest`, `declineRequest`,
+- Backend: Supabase only. Google sign-in (`src/auth/`) and one shared workspace in Supabase
+  Postgres (`src/store/remote.ts`, `supabase/migrations/`). State lives in a React context with
+  `useReducer`; in the shared workspace every change is shown at once and sent to a database
+  function, and without Supabase keys (tests, local dev) it is saved to `localStorage`. `useStore()` returns state plus `approveRequest`, `declineRequest`,
   `recordPurchase`, `cancelSubscription`, `addEmployee({ name, email, role? })` (duplicate email error,
   case-insensitive), `resetExampleData`, and derived values `monthlySpend`, `annualizedSpend`
   (monthly × 12), `activeSubscriptionCount`, `activeSeatCount`, `pendingRequestCount`,
@@ -133,7 +135,7 @@ How it behaves:
 - Sign-in mode per build: Supabase keys set → sign-in required. `npm run dev` without keys or the
   `e2e` test build → no sign-in. A production build without keys → "Sign-in isn't set up yet" screen
   (fails closed, the app never opens without sign-in by accident).
-- App data still lives in `localStorage` per browser, not per account.
+- Everyone who signs in shares one workspace (see below).
 
 ### One-time setup
 
@@ -156,7 +158,7 @@ your Supabase project ref (the part before `.supabase.co`).
 3. **Audience**: user type *External*, publishing status *Testing*. Add your own accounts under
    **Test users**. Note: because the app only asks for name, email and profile picture (no
    sensitive scopes), Google does **not** enforce the test-user list, so **any Google account can
-   sign in**. Sign-in does not restrict who can use Subscribio; app data stays in each browser.
+   sign in**. Admins can remove someone's access on the Team access page.
 4. **Data access**: the default `openid`, `.../auth/userinfo.email` and
    `.../auth/userinfo.profile` scopes are all that is needed (no verification required).
 5. **Clients** → Create client → *Web application*:
@@ -195,6 +197,34 @@ Copy `.env.example` to `.env.local`, fill in the two values and run `npm run dev
 - Sign out: back to the sign-in screen; a reload keeps you signed out.
 - Continue with Google, then press Cancel / close Google's account chooser with "Back": you see
   "Sign-in was cancelled" (or the button is ready again) and stay signed out.
+
+## Shared workspace and activity log
+
+Everyone who signs in works in **one shared workspace** stored in Supabase, and every change is
+recorded in an **activity log**.
+
+- **Activity** page (`/activity`, all members): who did what and when, newest first, updating live.
+- **Team access** page (`/team-access`, admins only): everyone who has signed in. Make someone an
+  admin, remove admin rights, remove someone's access or restore it.
+- Only admins can **Reset to zero** or **Load example data**, because that wipes everyone's data.
+- If someone else changed the same thing first (e.g. two people approve one request), the change is
+  refused, a "Not saved" message explains why and the page reloads the saved data.
+- Admins are listed in the `admin_emails` table (seeded with `mantasdainauskas22@gmail.com`). Add
+  an email there in Supabase → Table Editor to make someone admin on their next visit, or use
+  Team access once they have signed in.
+- Who has signed in is also visible in Supabase → Authentication → Users; the raw log is in the
+  `activity` table (Table Editor).
+
+How it is built (`supabase/migrations/0001_shared_workspace.sql`, run once in Supabase → SQL Editor):
+
+- Tables `employees`, `subscriptions`, `requests`, `activity`, `members`, `admin_emails`, all with
+  Row Level Security. Members can only **read**; the browser can't write to any table.
+- Every change goes through a database function (`approve_request`, `record_purchase`,
+  `add_employee`, `set_member_blocked`, …) that checks the caller, makes the change and writes the
+  activity row in one transaction, so the log can't be skipped or faked from the browser.
+- `join_workspace()` runs when the app opens: the first visit adds you to `members`.
+- The app listens for new `activity` rows (Supabase Realtime) and reloads, so other people's changes
+  appear without refreshing.
 
 ## Git workflow
 
