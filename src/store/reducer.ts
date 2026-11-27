@@ -10,7 +10,9 @@ export type Action =
   | { type: 'addEmployee'; name: string; email: string; role?: string; id: string }
   | { type: 'addSubscription'; subscription: Subscription; employeeId: string }
   | { type: 'reset' }
-  | { type: 'clear' };
+  | { type: 'clear' }
+  /** Shared workspace: replace everything with what Supabase returned. */
+  | { type: 'replace'; state: AppState };
 
 export function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
@@ -96,5 +98,8 @@ export function reducer(state: AppState, action: Action): AppState {
     // Empty workspace: no employees, subscriptions or requests, so every total is 0.
     case 'clear':
       return { subscriptions: [], employees: [], requests: [] };
+
+    case 'replace':
+      return action.state;
   }
 }

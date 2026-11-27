@@ -1,6 +1,13 @@
 import { useEffect, type ReactNode } from 'react';
 import { NavLink, Outlet, useLocation, matchPath } from 'react-router-dom';
-import { ClipboardText, SquaresFour, UsersThree, type Icon } from '@phosphor-icons/react';
+import {
+  ClipboardText,
+  ClockCounterClockwise,
+  ShieldCheck,
+  SquaresFour,
+  UsersThree,
+  type Icon,
+} from '@phosphor-icons/react';
 import { useStore } from '../../store';
 import { HeaderAccount, SidebarAccount } from './Account';
 
@@ -18,6 +25,8 @@ const HEADER_ROUTES = [
   '/requests/:requestId/purchase',
   '/requests/:requestId/recorded',
   '/requests/:requestId/declined',
+  '/activity',
+  '/team-access',
 ];
 // Screens with their own bottom action bar and no tab bar in Figma.
 const NO_TABBAR_ROUTES = [
@@ -50,6 +59,8 @@ const PAGE_TITLES: [string, string][] = [
   ['/add-employee', 'Add employee'],
   ['/add-subscription', 'Add subscription'],
   ['/design-system', 'Design system'],
+  ['/activity', 'Activity'],
+  ['/team-access', 'Team access'],
 ];
 
 function usePageChrome(pathname: string) {
@@ -101,7 +112,7 @@ export default function AppShell({ customChrome = false }: { customChrome?: bool
 
 /** Desktop navigation (lg and wider). Replaces the logo header and the bottom tab bar. */
 function Sidebar() {
-  const { pendingRequestCount, hasExampleData } = useStore();
+  const { pendingRequestCount, hasExampleData, mode, isAdmin } = useStore();
   return (
     <aside className="sticky top-0 hidden h-[100dvh] w-sidebar shrink-0 flex-col border-r border-line bg-surface px-3 py-5 lg:flex">
       <div className="px-2.5">
@@ -124,6 +135,12 @@ function Sidebar() {
               ) : null
             }
           />
+          {mode === 'shared' && (
+            <SidebarItem to="/activity" label="Activity" icon={ClockCounterClockwise} />
+          )}
+          {mode === 'shared' && isAdmin && (
+            <SidebarItem to="/team-access" label="Team access" icon={ShieldCheck} />
+          )}
         </ul>
       </nav>
       <div className="mt-auto flex flex-col gap-3">
@@ -223,7 +240,7 @@ export function Header() {
 
 /** Phone tab bar (below lg). */
 export function TabBar({ activeTab }: { activeTab?: 'overview' | 'employees' }) {
-  const { pendingRequestCount } = useStore();
+  const { pendingRequestCount, mode } = useStore();
   return (
     <nav
       aria-label="Main"
@@ -239,6 +256,7 @@ export function TabBar({ activeTab }: { activeTab?: 'overview' | 'employees' }) 
           count={pendingRequestCount}
           srExtra={pendingRequestCount > 0 ? `, ${pendingRequestCount} pending` : undefined}
         />
+        {mode === 'shared' && <Tab to="/activity" label="Activity" icon={ClockCounterClockwise} />}
       </ul>
     </nav>
   );
