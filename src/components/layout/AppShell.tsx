@@ -9,6 +9,8 @@ import {
   type Icon,
 } from '@phosphor-icons/react';
 import { useStore } from '../../store';
+import { tagScreen } from '../../analytics/clarity';
+import ConsentBanner, { PrivacySettingsLink } from './ConsentBanner';
 import { HeaderAccount, SidebarAccount } from './Account';
 
 // App frame.
@@ -67,6 +69,7 @@ function usePageChrome(pathname: string) {
   useEffect(() => {
     const title = PAGE_TITLES.find(([pattern]) => matchPath(pattern, pathname))?.[1];
     document.title = title ? `${title} · Subscribio` : 'Subscribio';
+    tagScreen(title ?? 'Other'); // Clarity: filter recordings by screen (only if the visitor allowed it)
     // A new screen starts at the top, like a normal page load (hash routing keeps the old scroll).
     window.scrollTo(0, 0);
   }, [pathname]);
@@ -106,6 +109,7 @@ export default function AppShell({ customChrome = false }: { customChrome?: bool
         </main>
         {showTabBar && <TabBar />}
       </div>
+      <ConsentBanner />
     </div>
   );
 }
@@ -155,6 +159,7 @@ function Sidebar() {
           </div>
         )}
         <SidebarAccount />
+        <PrivacySettingsLink className="self-start" />
       </div>
     </aside>
   );
