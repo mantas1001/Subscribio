@@ -106,7 +106,6 @@ function fakeDb(options: FakeOptions) {
         id: this.activity.length + 1,
         at: new Date().toISOString(),
         actor_id: me.user_id,
-        actor_email: me.email,
         actor_name: me.name,
         action: 'test',
         summary,
@@ -117,7 +116,7 @@ function fakeDb(options: FakeOptions) {
 
 async function fakeSupabase(page: Page, outcome: 'success' | 'cancel', options: FakeOptions = {}) {
   const db = fakeDb(options);
-  const calls = { authorize: [] as URL[], token: 0, logout: 0, rpc: [] as { fn: string; args: Record<string, unknown> }[], db };
+  const calls = { authorize: [] as URL[], token: 0, logout: 0, rpc: [] as { fn: string; args: Record<string, unknown> }[], selects: [] as string[], db };
   await page.route(`${SUPABASE}/**`, async (route) => {
     const url = new URL(route.request().url());
     if (url.pathname === '/auth/v1/authorize') {
@@ -156,14 +155,10 @@ async function fakeSupabase(page: Page, outcome: 'success' | 'cancel', options: 
         r.status = 'approved';
         db.log(`Approved the ${r.tool} request from Drew Cooper`);
       }
-      if (fn === 'set_member_blocked') {
-        const m = db.members.find((x) => x.user_id === args.p_user_id)!;
-        m.blocked = Boolean(args.p_blocked);
-        db.log(`Removed access for ${m.email}`);
-      }
       return route.fulfill({ status: 204, body: '' });
     }
     const table = url.pathname.match(/^\/rest\/v1\/(\w+)$/)?.[1];
+    if (table) calls.selects.push(`${table}?${url.searchParams.get('select') ?? ''}`);
     if (table && table in db) return json(db[table as 'employees']);
     return route.fulfill({ status: 404, body: '' });
   });
@@ -214,7 +209,7 @@ test('signing in returns to the page the user asked for, and signing out locks t
   await expect(page).toHaveTitle('Employees · Subscribio');
 
   await page.goto('/#/');
-  await page.getByRole('button', { name: `Sign out ${user.email}` }).click();
+  await page.getByRole('button', { name: 'Sign out' }).click();
   await expect(page.getByRole('heading', { name: 'Sign in to Subscribio' })).toBeVisible();
   expect(calls.logout).toBe(1);
   await page.reload();
@@ -267,6 +262,9 @@ test.describe('shared workspace', () => {
     await page.goto('/#/activity');
     await expect(page.getByRole('heading', { name: 'Activity', level: 1 })).toBeVisible();
     await expect(page.getByText('approved the ChatGPT Team request from Drew Cooper')).toBeVisible();
+    // Names only: the log never loads or shows anyone's email.
+    expect(calls.selects.filter((q) => q.startsWith('activity?')).join()).not.toContain('email');
+    await expect(page.getByRole('main')).not.toContainText('@');
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
     expect(results.violations).toEqual([]);
   });
@@ -281,31 +279,23 @@ test.describe('shared workspace', () => {
     await expect(page.getByText('ChatGPT Team').first()).toBeVisible();
   });
 
-  test('members can see Activity but not Team access or the reset action', async ({ page }) => {
+  test('members can see Activity but not the reset action', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await signIn(page, { role: 'member' });
     const sidebar = page.locator('aside');
     await expect(sidebar.getByRole('link', { name: 'Activity' })).toBeVisible();
-    await expect(sidebar.getByRole('link', { name: 'Team access' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Reset example data' })).toHaveCount(0);
-    await page.goto('/#/team-access');
-    await expect(page).toHaveURL(/#\/$/);
   });
 
-  test('admins can remove someone\'s access on Team access', async ({ page }) => {
+  test('there is no Team access page (it listed everyone’s email)', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
-    const calls = await signIn(page);
-    await page.locator('aside').getByRole('link', { name: 'Team access' }).click();
-    await expect(page.getByRole('heading', { name: 'Team access', level: 1 })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Remove access for Alex Example/ })).toHaveCount(0);
-    await page.getByRole('button', { name: 'Remove access for Sam Example' }).click();
-    await expect(page.getByRole('button', { name: 'Restore access for Sam Example' })).toBeVisible();
-    expect(calls.rpc.find((c) => c.fn === 'set_member_blocked')?.args).toEqual({
-      p_user_id: '00000000-0000-4000-8000-000000000002',
-      p_blocked: true,
-    });
-    const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
-    expect(results.violations).toEqual([]);
+    await signIn(page);
+    await expect(page.locator('aside').getByRole('link', { name: 'Activity' })).toBeVisible();
+    await expect(page.locator('aside').getByRole('link', { name: 'Team access' })).toHaveCount(0);
+    await page.goto('/#/team-access');
+    await expect(page).toHaveURL(/#\/$/);
+    await page.goto('/#/activity');
+    await expect(page.getByRole('link', { name: 'Team access' })).toHaveCount(0);
   });
 
   test('blocked members see "You don\u2019t have access"', async ({ page }) => {
@@ -325,4 +315,6 @@ test('Clarity is linked to the member by user ID and role only', async ({ page }
   expect(calls).toContainEqual(['identify', user.id]);
   expect(calls).toContainEqual(['set', 'role', 'admin']);
   expect(JSON.stringify(calls)).not.toContain(user.email);
+  // Recordings mask all text in the app, so names and emails on screen never reach Clarity.
+  await expect(page.locator('#root')).toHaveAttribute('data-clarity-mask', 'True');
 });

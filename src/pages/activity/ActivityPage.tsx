@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { ClockCounterClockwise, ShieldCheck } from '@phosphor-icons/react';
+import { ClockCounterClockwise } from '@phosphor-icons/react';
 import { useStore } from '../../store';
 import { fetchActivity, type ActivityEntry } from '../../store/remote';
 import { supabase } from '../../auth/supabase';
 import PageHeader from '../../components/layout/PageHeader';
-import LinkButton from '../../components/ui/LinkButton';
 import EmptyState from '../../components/ui/EmptyState';
 import ErrorMessage from '../../components/ui/ErrorMessage';
 
@@ -27,7 +26,7 @@ function when(iso: string, now: number) {
 
 /** Activity log: who changed what in the shared workspace, newest first. All members can see it. */
 export default function ActivityPage() {
-  const { mode, isAdmin, activityVersion } = useStore();
+  const { mode, activityVersion } = useStore();
   const [entries, setEntries] = useState<ActivityEntry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,14 +55,6 @@ export default function ActivityPage() {
       <PageHeader
         title="Activity"
         description="Who changed what in this workspace, newest first. Updates live."
-        actions={
-          isAdmin ? (
-            <LinkButton to="/team-access" variant="secondary">
-              <ShieldCheck size={18} aria-hidden="true" />
-              Team access
-            </LinkButton>
-          ) : undefined
-        }
       />
 
       {error && <ErrorMessage title="Couldn’t load the activity log" message={error} />}
@@ -85,7 +76,7 @@ export default function ActivityPage() {
       {entries && entries.length > 0 && (
         <ol className="overflow-hidden rounded-xl border border-line bg-surface shadow-card">
           {entries.map((entry) => {
-            const who = entry.actor_name || entry.actor_email || 'Someone';
+            const who = entry.actor_name || 'Someone';
             return (
               <li
                 key={entry.id}
@@ -101,9 +92,6 @@ export default function ActivityPage() {
                   <p className="text-small text-brand-ink">
                     <span className="font-semibold">{who}</span> {lowerFirst(entry.summary)}
                   </p>
-                  {entry.actor_email && entry.actor_email !== who && (
-                    <p className="truncate text-caption text-muted">{entry.actor_email}</p>
-                  )}
                 </div>
                 <time
                   dateTime={entry.at}

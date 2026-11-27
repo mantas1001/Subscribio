@@ -15,7 +15,6 @@ import ReadyToPurchasePage from './pages/requests/ReadyToPurchasePage';
 import PurchaseRecordedPage from './pages/requests/PurchaseRecordedPage';
 import RequestDeclinedPage from './pages/requests/RequestDeclinedPage';
 import ActivityPage from './pages/activity/ActivityPage';
-import TeamAccessPage from './pages/team/TeamAccessPage';
 
 // Routes (Figma frame → path). Owners replace their ComingSoon entry with the real page.
 //   1.1 / 1.2 / 1.3 Overview           → /                        (Role A)
@@ -32,7 +31,6 @@ import TeamAccessPage from './pages/team/TeamAccessPage';
 //   Add subscription (no Figma frame)   → /add-subscription?employee=<id>  (built like 5.1–5.3)
 //   Design system                       → /design-system           (Role C)
 //   Activity log (shared workspace)     → /activity
-//   Team access (admins)                → /team-access
 // Google sign-in (Supabase Auth) wraps everything: AuthGate shows the sign-in screen until the
 // user is signed in. See src/auth/ and "Google sign-in" in the README.
 export default function App() {
@@ -54,7 +52,6 @@ export default function App() {
                 <Route path="add-subscription" element={<AddSubscriptionPage />} />
                 <Route path="design-system" element={<DesignSystemPage />} />
                 <Route path="activity" element={<ActivityPage />} />
-                <Route path="team-access" element={<TeamAccessPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>
               <Route element={<AppShell customChrome />}>
