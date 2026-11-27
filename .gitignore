@@ -10,12 +10,14 @@ pnpm-debug.log*
 node_modules
 dist
 dist-ssr
+dist-auth
 *.local
 *.tsbuildinfo
 
 # Environment
 .env
 .env.*
+!.env.example
 
 # Editor and local tool settings
 .claude/

@@ -1,5 +1,7 @@
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { StoreProvider } from './store';
+import { AuthProvider } from './auth/AuthProvider';
+import AuthGate from './auth/AuthGate';
 import AppShell from './components/layout/AppShell';
 import OverviewPage from './pages/overview/OverviewPage';
 import { EmployeesRoute, EmployeeDetailRoute, SubscriptionRoute } from './pages/employees/RoleBRoutes';
@@ -27,36 +29,42 @@ import RequestDeclinedPage from './pages/requests/RequestDeclinedPage';
 //   5.1–5.3 Add team member             → /add-employee            (Role C)
 //   Add subscription (no Figma frame)   → /add-subscription?employee=<id>  (built like 5.1–5.3)
 //   Design system                       → /design-system           (Role C)
+// Google sign-in (Supabase Auth) wraps everything: AuthGate shows the sign-in screen until the
+// user is signed in. See src/auth/ and "Google sign-in" in the README.
 export default function App() {
   return (
-    <StoreProvider>
-      <HashRouter>
-        <Routes>
-          <Route element={<AppShell />}>
-            <Route index element={<OverviewPage />} />
-            <Route path="requests" element={<RequestsPage />} />
-            <Route path="requests/:requestId" element={<RequestDetailPage />} />
-            <Route path="requests/:requestId/approved" element={<RequestApprovedPage />} />
-            <Route path="requests/:requestId/purchase" element={<ReadyToPurchasePage />} />
-            <Route path="requests/:requestId/recorded" element={<PurchaseRecordedPage />} />
-            <Route path="requests/:requestId/declined" element={<RequestDeclinedPage />} />
-            <Route path="add-employee" element={<AddEmployeePage />} />
-            <Route path="add-subscription" element={<AddSubscriptionPage />} />
-            <Route path="design-system" element={<DesignSystemPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Route>
-          <Route element={<AppShell customChrome />}>
-            <Route path="employees" element={<EmployeesRoute />} />
-            <Route path="employees/:employeeId" element={<EmployeeDetailRoute />} />
-            <Route path="subscriptions/:subscriptionId">
-              <Route index element={<SubscriptionRoute />} />
-              <Route path="cancel" element={<SubscriptionRoute screen="confirm" />} />
-              <Route path="cancelled" element={<SubscriptionRoute screen="cancelled" />} />
-              <Route path="kept" element={<SubscriptionRoute screen="kept" />} />
-            </Route>
-          </Route>
-        </Routes>
-      </HashRouter>
-    </StoreProvider>
+    <AuthProvider>
+      <AuthGate>
+        <StoreProvider>
+          <HashRouter>
+            <Routes>
+              <Route element={<AppShell />}>
+                <Route index element={<OverviewPage />} />
+                <Route path="requests" element={<RequestsPage />} />
+                <Route path="requests/:requestId" element={<RequestDetailPage />} />
+                <Route path="requests/:requestId/approved" element={<RequestApprovedPage />} />
+                <Route path="requests/:requestId/purchase" element={<ReadyToPurchasePage />} />
+                <Route path="requests/:requestId/recorded" element={<PurchaseRecordedPage />} />
+                <Route path="requests/:requestId/declined" element={<RequestDeclinedPage />} />
+                <Route path="add-employee" element={<AddEmployeePage />} />
+                <Route path="add-subscription" element={<AddSubscriptionPage />} />
+                <Route path="design-system" element={<DesignSystemPage />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Route>
+              <Route element={<AppShell customChrome />}>
+                <Route path="employees" element={<EmployeesRoute />} />
+                <Route path="employees/:employeeId" element={<EmployeeDetailRoute />} />
+                <Route path="subscriptions/:subscriptionId">
+                  <Route index element={<SubscriptionRoute />} />
+                  <Route path="cancel" element={<SubscriptionRoute screen="confirm" />} />
+                  <Route path="cancelled" element={<SubscriptionRoute screen="cancelled" />} />
+                  <Route path="kept" element={<SubscriptionRoute screen="kept" />} />
+                </Route>
+              </Route>
+            </Routes>
+          </HashRouter>
+        </StoreProvider>
+      </AuthGate>
+    </AuthProvider>
   );
 }
