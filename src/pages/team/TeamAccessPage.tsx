@@ -82,6 +82,7 @@ export default function TeamAccessPage() {
                     {m.blocked && <Badge tone="danger">No access</Badge>}
                   </p>
                   {m.name && <p className="truncate text-caption text-muted">{m.email}</p>}
+                  <p className="break-all text-caption text-muted">User ID (Clarity): {m.user_id}</p>
                   <p className="text-caption text-muted">
                     Joined {dateFormat.format(new Date(m.first_seen))} · last seen{' '}
                     {dateFormat.format(new Date(m.last_seen))}

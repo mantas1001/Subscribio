@@ -10,6 +10,8 @@ import {
 } from '@phosphor-icons/react';
 import { useStore } from '../../store';
 import { HeaderAccount, SidebarAccount } from './Account';
+import { useAuth } from '../../auth/AuthProvider';
+import { identifyClarity } from '../../analytics/clarity';
 
 // App frame.
 // Desktop (lg, 1024 px and wider) is the main target (issue #10): a left sidebar with the
@@ -63,6 +65,17 @@ const PAGE_TITLES: [string, string][] = [
   ['/team-access', 'Team access'],
 ];
 
+/** Links Clarity recordings to the signed-in member: Supabase user ID and role only. */
+function useClarityIdentity() {
+  const { user } = useAuth();
+  const { member } = useStore();
+  const userId = user?.id;
+  const role = member?.role ?? null;
+  useEffect(() => {
+    if (userId) identifyClarity(userId, role);
+  }, [userId, role]);
+}
+
 function usePageChrome(pathname: string) {
   useEffect(() => {
     const title = PAGE_TITLES.find(([pattern]) => matchPath(pattern, pathname))?.[1];
@@ -75,6 +88,7 @@ function usePageChrome(pathname: string) {
 export default function AppShell({ customChrome = false }: { customChrome?: boolean }) {
   const { pathname } = useLocation();
   usePageChrome(pathname);
+  useClarityIdentity();
   // customChrome: Role B's screens draw their own header and tab bar (RoleBLayout).
   const showHeader = !customChrome && matches(HEADER_ROUTES, pathname);
   const showTabBar = !customChrome && !matches(NO_TABBAR_ROUTES, pathname);

@@ -12,8 +12,8 @@ export default defineConfig({
     viewport: { width: 440, height: 956 },
   },
   projects: [
-    { name: 'app', testIgnore: /auth\.spec\.ts/, use: { baseURL } },
-    { name: 'auth', testMatch: /auth\.spec\.ts/, use: { baseURL: authURL } },
+    { name: 'app', testIgnore: /(auth|clarity)\.spec\.ts/, use: { baseURL } },
+    { name: 'auth', testMatch: /(auth|clarity)\.spec\.ts/, use: { baseURL: authURL } },
   ],
   webServer: [
     {
@@ -29,6 +29,7 @@ export default defineConfig({
       env: {
         VITE_SUPABASE_URL: FAKE_SUPABASE_URL,
         VITE_SUPABASE_PUBLISHABLE_KEY: 'test-publishable-key',
+        VITE_CLARITY_PROJECT_ID: 'test-clarity',
       },
     },
   ],
