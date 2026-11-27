@@ -1,13 +1,19 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Button from '../components/ui/Button';
 import ErrorMessage from '../components/ui/ErrorMessage';
 import { Logo } from '../components/layout/AppShell';
 import { useAuth } from './AuthProvider';
+import GoogleButton from './GoogleButton';
+import { googleClientId } from './googleIdentity';
 
 /** Full-screen sign-in. Rendered by AuthGate instead of the app while signed out. */
 export default function SignInPage() {
-  const { status, error, redirecting, signInWithGoogle } = useAuth();
+  const { status, error, redirecting, signInWithGoogle, signInWithGoogleIdToken } = useAuth();
   const misconfigured = status === 'misconfigured';
+  // Google's own button when a client ID is configured (Google then names this site, not the
+  // Supabase address). The redirect button otherwise, or when Google's script can't load.
+  const [googleButtonFailed, setGoogleButtonFailed] = useState(false);
+  const showGoogleButton = Boolean(googleClientId) && !misconfigured && !googleButtonFailed;
 
   useEffect(() => {
     document.title = 'Sign in · Subscribio';
@@ -38,16 +44,31 @@ export default function SignInPage() {
             error && <ErrorMessage className="mt-6" title="Not signed in" message={error} />
           )}
 
-          <Button
-            variant="secondary"
-            className="mt-6 w-full"
-            onClick={signInWithGoogle}
-            disabled={misconfigured || redirecting}
-            aria-busy={redirecting || undefined}
-          >
-            <GoogleMark />
-            {redirecting ? 'Opening Google…' : 'Continue with Google'}
-          </Button>
+          {showGoogleButton ? (
+            <>
+              <GoogleButton
+                onCredential={signInWithGoogleIdToken}
+                onUnavailable={() => setGoogleButtonFailed(true)}
+                disabled={redirecting}
+              />
+              {redirecting && (
+                <p className="mt-3 text-center text-small text-muted" role="status">
+                  Signing you in…
+                </p>
+              )}
+            </>
+          ) : (
+            <Button
+              variant="secondary"
+              className="mt-6 w-full"
+              onClick={signInWithGoogle}
+              disabled={misconfigured || redirecting}
+              aria-busy={redirecting || undefined}
+            >
+              <GoogleMark />
+              {redirecting ? 'Opening Google…' : 'Continue with Google'}
+            </Button>
+          )}
           <p className="mt-4 text-caption text-muted">
             Subscribio only receives your name, email address and profile picture from Google.
           </p>

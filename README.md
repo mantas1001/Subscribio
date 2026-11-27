@@ -136,6 +136,12 @@ How it behaves:
   `e2e` test build → no sign-in. A production build without keys → "Sign-in isn't set up yet" screen
   (fails closed, the app never opens without sign-in by accident).
 - Everyone who signs in shares one workspace (see below).
+- **Google's own button (recommended):** when `VITE_GOOGLE_CLIENT_ID` is set, the sign-in screen
+  shows Google's "Continue with Google" button (Google Identity Services, `src/auth/GoogleButton.tsx`).
+  Google opens a popup on this site and Supabase gets Google's ID token
+  (`signInWithIdToken`, with a nonce). The user never visits `<ref>.supabase.co`, so Google's
+  screen says **"Sign in to subscribio.vercel.app"** instead of "Sign in to <ref>.supabase.co".
+  Without the variable, or if Google's script can't load, the app uses the redirect flow below.
 
 ### One-time setup
 
@@ -185,7 +191,20 @@ your Supabase project ref (the part before `.supabase.co`).
 2. Redeploy. Vite bakes these values in at build time, so an old deployment keeps showing
    "Sign-in isn't set up yet" until it is rebuilt.
 
-**5. Local development**
+**5. Google's button, so Google shows this site instead of the Supabase address**
+
+1. Vercel → Project → Settings → Environment Variables: add `VITE_GOOGLE_CLIENT_ID` = the
+   Client ID from step 2.6 (`…apps.googleusercontent.com`, public) for Production and Preview.
+   Redeploy.
+2. Nothing else: the client already lists `https://subscribio.vercel.app` as an authorized
+   JavaScript origin (step 2.5), and Supabase accepts ID tokens for the Client ID entered in
+   step 3.1. Leave "Skip nonce checks" off.
+3. To show the name **Subscribio** and a logo instead of the address, Google has to verify the
+   brand (Google Auth Platform → Branding → logo, home page and privacy policy links, then
+   "Verification Center"). That needs a domain you own and have verified in Google Search
+   Console. Until then Google shows the site address, and a grey "?" where the logo would be.
+
+**6. Local development**
 
 Copy `.env.example` to `.env.local`, fill in the two values and run `npm run dev`
 (`.env.local` is git-ignored).

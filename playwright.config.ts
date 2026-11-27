@@ -5,6 +5,8 @@ const baseURL = 'http://127.0.0.1:4174';
 // tests/auth.spec.ts answers with page.route (no network, no real Google account).
 const authURL = 'http://127.0.0.1:4175';
 const FAKE_SUPABASE_URL = 'https://auth-test.supabase.co';
+// Same, plus a Google client ID: sign-in uses Google's own button (tests/google-button.spec.ts).
+const googleURL = 'http://127.0.0.1:4176';
 
 export default defineConfig({
   testDir: './tests',
@@ -12,8 +14,9 @@ export default defineConfig({
     viewport: { width: 440, height: 956 },
   },
   projects: [
-    { name: 'app', testIgnore: /(auth|clarity)\.spec\.ts/, use: { baseURL } },
+    { name: 'app', testIgnore: /(auth|clarity|google-button)\.spec\.ts/, use: { baseURL } },
     { name: 'auth', testMatch: /(auth|clarity)\.spec\.ts/, use: { baseURL: authURL } },
+    { name: 'google', testMatch: /google-button\.spec\.ts/, use: { baseURL: googleURL } },
   ],
   webServer: [
     {
@@ -30,6 +33,20 @@ export default defineConfig({
         VITE_SUPABASE_URL: FAKE_SUPABASE_URL,
         VITE_SUPABASE_PUBLISHABLE_KEY: 'test-publishable-key',
         VITE_CLARITY_PROJECT_ID: 'test-clarity',
+        // Redirect sign-in in this build, even if .env.local sets a Google client ID.
+        VITE_GOOGLE_CLIENT_ID: '',
+      },
+    },
+    {
+      command:
+        'npx vite build --mode auth-test --outDir dist-google && npx vite preview --outDir dist-google --host 127.0.0.1 --port 4176 --strictPort --bypass-lock',
+      url: googleURL,
+      timeout: 180_000,
+      env: {
+        VITE_SUPABASE_URL: FAKE_SUPABASE_URL,
+        VITE_SUPABASE_PUBLISHABLE_KEY: 'test-publishable-key',
+        VITE_CLARITY_PROJECT_ID: '',
+        VITE_GOOGLE_CLIENT_ID: 'test-client.apps.googleusercontent.com',
       },
     },
   ],
