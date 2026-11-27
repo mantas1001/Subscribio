@@ -3,7 +3,6 @@ import { NavLink, Outlet, useLocation, matchPath } from 'react-router-dom';
 import {
   ClipboardText,
   ClockCounterClockwise,
-  ShieldCheck,
   SquaresFour,
   UsersThree,
   type Icon,
@@ -28,7 +27,6 @@ const HEADER_ROUTES = [
   '/requests/:requestId/recorded',
   '/requests/:requestId/declined',
   '/activity',
-  '/team-access',
 ];
 // Screens with their own bottom action bar and no tab bar in Figma.
 const NO_TABBAR_ROUTES = [
@@ -62,7 +60,6 @@ const PAGE_TITLES: [string, string][] = [
   ['/add-subscription', 'Add subscription'],
   ['/design-system', 'Design system'],
   ['/activity', 'Activity'],
-  ['/team-access', 'Team access'],
 ];
 
 /** Links Clarity recordings to the signed-in member: Supabase user ID and role only. */
@@ -126,7 +123,7 @@ export default function AppShell({ customChrome = false }: { customChrome?: bool
 
 /** Desktop navigation (lg and wider). Replaces the logo header and the bottom tab bar. */
 function Sidebar() {
-  const { pendingRequestCount, hasExampleData, mode, isAdmin } = useStore();
+  const { pendingRequestCount, hasExampleData, mode } = useStore();
   return (
     <aside className="sticky top-0 hidden h-[100dvh] w-sidebar shrink-0 flex-col border-r border-line bg-surface px-3 py-5 lg:flex">
       <div className="px-2.5">
@@ -151,9 +148,6 @@ function Sidebar() {
           />
           {mode === 'shared' && (
             <SidebarItem to="/activity" label="Activity" icon={ClockCounterClockwise} />
-          )}
-          {mode === 'shared' && isAdmin && (
-            <SidebarItem to="/team-access" label="Team access" icon={ShieldCheck} />
           )}
         </ul>
       </nav>

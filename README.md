@@ -158,7 +158,8 @@ your Supabase project ref (the part before `.supabase.co`).
 3. **Audience**: user type *External*, publishing status *Testing*. Add your own accounts under
    **Test users**. Note: because the app only asks for name, email and profile picture (no
    sensitive scopes), Google does **not** enforce the test-user list, so **any Google account can
-   sign in**. Admins can remove someone's access on the Team access page.
+   sign in**. To remove someone, set `blocked = true` on their row in the `members` table
+   (Supabase → Table Editor).
 4. **Data access**: the default `openid`, `.../auth/userinfo.email` and
    `.../auth/userinfo.profile` scopes are all that is needed (no verification required).
 5. **Clients** → Create client → *Web application*:
@@ -204,18 +205,21 @@ Everyone who signs in works in **one shared workspace** stored in Supabase, and 
 recorded in an **activity log**.
 
 - **Activity** page (`/activity`, all members): who did what and when, newest first, updating live.
-- **Team access** page (`/team-access`, admins only): everyone who has signed in. Make someone an
-  admin, remove admin rights, remove someone's access or restore it.
+- Members see **names only** in the app: the activity log never loads or shows anyone's email
+  (the database refuses to hand out `activity.actor_email`, see `0002_hide_emails.sql`). There is
+  no in-app member list; manage members in Supabase → Table Editor → `members`
+  (`role` = `admin`/`member`, `blocked` = `true` removes access).
 - Only admins can **Reset to zero** or **Load example data**, because that wipes everyone's data.
 - If someone else changed the same thing first (e.g. two people approve one request), the change is
   refused, a "Not saved" message explains why and the page reloads the saved data.
 - Admins are listed in the `admin_emails` table (seeded with `mantasdainauskas22@gmail.com`). Add
-  an email there in Supabase → Table Editor to make someone admin on their next visit, or use
-  Team access once they have signed in.
+  an email there in Supabase → Table Editor to make someone admin on their next visit, or set
+  `role = 'admin'` on their `members` row once they have signed in.
 - Who has signed in is also visible in Supabase → Authentication → Users; the raw log is in the
   `activity` table (Table Editor).
 
-How it is built (`supabase/migrations/0001_shared_workspace.sql`, run once in Supabase → SQL Editor):
+How it is built (`supabase/migrations/0001_shared_workspace.sql`, then
+`0002_hide_emails.sql`, each run once in Supabase → SQL Editor):
 
 - Tables `employees`, `subscriptions`, `requests`, `activity`, `members`, `admin_emails`, all with
   Row Level Security. Members can only **read**; the browser can't write to any table.
@@ -236,8 +240,11 @@ project **Subscribio** (ID `zk7es1fao8`). Code: `src/analytics/clarity.ts`.
   require that visitors are informed). Anyone you share the link with should get that notice too.
 - **Linked to members, pseudonymously:** signed-in visits send Clarity the Supabase user ID
   (`identify` + tag `user_id`) and the tag `role` (admin/member). No name or email is sent. Each
-  member's user ID is shown on **Team access**; filter by it in Clarity to find their sessions.
-- Clarity masks typed text by default; keep masking on (Clarity → Settings → Masking).
+  member's user ID is in the `members` table (`user_id`); filter by it in Clarity to find their
+  sessions.
+- **All text in the app is masked** in recordings (`data-clarity-mask="True"` on `#root` in
+  `index.html`), so names, emails and amounts on screen never reach Microsoft. Heatmaps and clicks
+  still work. Keep masking on in Clarity too (Clarity → Settings → Masking).
 - Config: `VITE_CLARITY_PROJECT_ID` (Vercel env var, Production + Preview). Without it, or in the
   `e2e` test build, Clarity is not loaded.
 - `tests/clarity.spec.ts` checks Clarity loads on its own; `tests/auth.spec.ts` checks the identify

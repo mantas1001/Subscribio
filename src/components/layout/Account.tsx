@@ -59,13 +59,12 @@ export function SidebarAccount() {
 export function HeaderAccount() {
   const { user, signOut } = useAuth();
   if (!user) return null;
-  const account = accountDisplay(user);
   return (
     <button
       type="button"
       onClick={signOut}
       className="flex min-h-11 items-center gap-1.5 rounded-md px-1.5 text-small font-medium text-muted hover:text-brand-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-      aria-label={`Sign out ${account.email || account.name}`}
+      aria-label="Sign out"
     >
       <SignOut size={20} aria-hidden="true" />
       <span>Sign out</span>

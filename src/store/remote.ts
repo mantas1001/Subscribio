@@ -20,7 +20,6 @@ export type ActivityEntry = {
   id: number;
   at: string;
   actor_id: string | null;
-  actor_email: string | null;
   actor_name: string | null;
   action: string;
   summary: string;
@@ -136,18 +135,10 @@ export async function callAction(client: SupabaseClient, fn: string, args?: Reco
 export async function fetchActivity(client: SupabaseClient, limit = 200): Promise<ActivityEntry[]> {
   const { data, error } = await client
     .from('activity')
-    .select('id,at,actor_id,actor_email,actor_name,action,summary')
+    .select('id,at,actor_id,actor_name,action,summary')
     .order('at', { ascending: false })
     .limit(limit);
   if (error) throw toRemoteError(error);
   return (data ?? []) as ActivityEntry[];
 }
 
-export async function fetchMembers(client: SupabaseClient): Promise<Member[]> {
-  const { data, error } = await client
-    .from('members')
-    .select('user_id,email,name,role,blocked,first_seen,last_seen')
-    .order('last_seen', { ascending: false });
-  if (error) throw toRemoteError(error);
-  return (data ?? []) as Member[];
-}
